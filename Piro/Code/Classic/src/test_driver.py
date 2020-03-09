@@ -22,7 +22,7 @@ class TestAllInputs(unittest.TestCase):
 
 
     def run_tests_with_solver(self, solver):
-        for dirpath, _, filenames in os.walk('Classic/SAT/src/tests'):
+        for dirpath, _, filenames in os.walk('tests'):
             for name in filenames:
                 if name.endswith('.in'):
                     input_file_path = os.path.join(dirpath, name)
