@@ -138,3 +138,11 @@ dmypy.json
 /Maximum_Flow_Analysis/Report/*.out
 /Maximum_Flow_Analysis/Report/*.blg
 /Maximum_Flow_Analysis/Report/*.bbl
+
+/Piro/Report/Paper/*.log
+/Piro/Report/Paper/*.aux
+/Piro/Report/Paper/*.synctex.gz
+/Piro/Report/Paper/*.toc
+/Piro/Report/Paper/*.out
+/Piro/Report/Paper/*.blg
+/Piro/Report/Paper/*.bbl
