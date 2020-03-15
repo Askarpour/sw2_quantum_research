@@ -1,4 +1,4 @@
-# An Introduction to Quantum Computing with SAT
+# An Introduction to Quantum Computing for Computer Scientists, with SAT
 
 This repository contains the material I have used during my study of the state of the art for __Quantum Computation__.
 

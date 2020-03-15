@@ -2,21 +2,60 @@
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
+\usepackage{hyperref}
+\usepackage{amssymb}
+\usepackage{amsmath}
 
 \begin{document}
-	\title{An Introduction to Quantum Computing with SAT}
+	\title{An Introduction to Quantum Computing for Computer Scientists, with SAT}
 	\author{Francesco Piro}
 	\maketitle
 	
 	\begin{abstract}
-		This is the paper I have produced during my study of quantum computing for solving the SAT problem
+		This is the paper I have produced during my study of quantum computing for solving the SAT problem...
 	\end{abstract}
 	
-	\section{Introduction}
+	\section*{Introduction}
 	\label{sec:introduction}
+	Quantum computation is a wide area involving several disciplines that is having always more success in nowadays applications thanks in particular to the development of the technology and its incredible results. Quantum physics' principles are the fundamentals on which the entire theory is based: thanks to their properties, new architectures allow to define devices that can solve classical problems in surprisingly reduced time and space complexities. However we always have a trade-off to consider, in particular now that these technology are still emerging.\\
+	
+	This paper aims at giving a description for computer scientists of what a quantum computer is and which are its real impacts and advantages with respect to the classical ones. Hence I will try to provide a description of the state of the art of quantum computing with an approach that allows to understand how from the basic principles of quantum mechanics we are able to have an algorithm that is faster with respect to its classic counterpart. In order to do so in the first chapter (\ref{sec:quantumComputing}) I will start with the basic linear algebra needed to study the quantum physics' principles we need to define a quantum computer. The definition of the \emph{quantum computer} is fundamental both to understand how and algorithm is executed but also to have a comparison with the classic Turing machine that allows us to determine conclusions on computational complexity (chapter \ref{sec:computationalTheory}). In the first chapter we will also have practical examples realized with the \textbf{qiskit library} in order to clarify also with some lines of code the concepts. Once the background on quantum computation and computational theory are well consolidated by the reader, the last chapters provide a practical example that is used to prove the speedup for the particular \textbf{satisfiability problem.} I have used an efficient classical solver for the \emph{k-SAT} as I could compare it with my quantum implementation, both realized in python. In the end I provide some important conclusions for quantum computing that I was able to conclude thanks to my study, in particular in the papers listed in the references.
 	
 	\section{Quantum Computing}
 	\label{sec:quantumComputing}
+		This chapter aims at providing first the fundamentals needed in order to deal with quantum mechanics and second at defining a quantum computer thanks to the principles previously identified. With the quantum device we will be able to make a comparison with the classical one to understand with examples how the basic operations are realized in order to use them to implement complete algorithms. Further in the chapter, a section is completely dedicated to the main quantum search algorithm that is fundamental to solve the SAT with a quantum algorithm. Also here we will start from a classical version to compare it with its quantum counterpart. All the arguments related in this chapter, together with the ones in the next (\ref{sec:computationalTheory}) are fundamental to give a significant interpretation to the comparison between the classic and quantum implementation of the algorithm able to solve the \textbf{satisfiability problem} (\ref{sec:sat}).
+		
+		\subsection{Fundamentals}
+		\label{sec:fundamentals}
+			The study of quantum computers requires the knowledge of the decimal and binary representation of integers, probability notions and in particular linear algebra fundamental definitions like the ones of: \emph{vectors, spaces, bases, linear systems, tensor product...}. In this section are presented the basic concepts needed to face the quantum physics principles that we need in order to realize our quantum computer. 
+			
+			\subsubsection{Linear Algebra}
+			\label{sec:linearAlgebra}
+			In order to realize a quantum computer we need understand how to define a state that is able to contain information that can be used to obtain a certain objective. As we will see in the next section, the state of a quantum device is a quantum state, thus a mathematical model that lives into a specific \emph{vector state} whose dimension depends on the amount of information it needs to take care of. Typically, significant states contain information that results from the composition of several spaces combined together thanks to a particular operator called tensor product.
+			
+			\paragraph{Definition (Tensor Product):} \emph{Given two vector spaces V and W over a field K with bases $e_1,..., e_m$ and$f_1,..., f_n$ respectively, the tensor product $V \otimes W$ is another vector space over K of dimensionmn. The tensor product space is equipped with a bilinear operation $\otimes : V \times W \rightarrow V \otimes W$. Thevector space $V \otimes W$ has basis $e_i \otimes f_j \forall i = 1,...,m, j = 1,...,n$}.
+			
+			Typically we are going to work with complex Euclidean vector spaces of the form $\mathbb{C}^n$ and, by choosing the standard basis in the origin vector spaces, then the tensor product is nothing more than the Kronecker product.
+			
+			\paragraph{Definition (Kronecker Product):} \emph{Given $A \in \mathbb{C}^{m\times n}$, $B \in \mathbb{C}^{p\times q}$, the Kronecker product $A \otimes B$ is the matrix $D \in \mathbb{C}^{mp\times nq}$ defined as:}
+			\begin{center}
+				$
+				D = A\otimes B =
+				\begin{pmatrix}
+				a_{11}B & \cdots & a_{1n}B \\
+				a_{21}B & \cdots  & a_{2n}B \\
+				\vdots & \vdots & \vdots \\
+				a_{m1}B & \cdots & a_{mn}B
+				\end{pmatrix}
+				$
+			\end{center}
+						
+			\subsubsection{Quantum Mechanics}
+			\label{sec:quantumMechanics}
+			
+			\subsubsection{The Quantum Computer}
+			\label{sec:quantumComputer}
+			
 		\subsection{Grover's Algorithm}
 		\label{sec:grover}
 		
