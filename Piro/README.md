@@ -45,8 +45,3 @@ In particular the repository contains:
 - __Report__: contains the tex files and the final pdf for the documentation of the entire project. In particular
               [this](https://github.com/Askarpour/sw2_quantum_research/blob/master/Piro/Report/Paper/QuantumSAT.pdf) is
               the final paper of the entire work done.
-<<<<<<< HEAD
-=======
-
->>>>>>> fae377859f541f637c0e1734a69cf2e7e6e56334
-    
