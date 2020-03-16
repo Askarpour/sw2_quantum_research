@@ -1,10 +1,20 @@
 \documentclass[english]{article}
+
+% packages
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
 \usepackage{hyperref}
 \usepackage{amssymb}
 \usepackage{amsmath}
+
+% commands
+\newcommand{\sbigotimes}{%
+	\mathop{\mathchoice{\textstyle\bigotimes}{\bigotimes}{\bigotimes}{\bigotimes}}%
+}
+
+\newcommand{\zeroket}{\begin{pmatrix} 1 \\ 0 \end{pmatrix}}
+\newcommand{\oneket}{\begin{pmatrix} 0 \\ 1 \end{pmatrix}}
 
 \begin{document}
 	\title{An Introduction to Quantum Computing for Computer Scientists, with SAT}
@@ -31,9 +41,14 @@
 			
 			\subsubsection{Linear Algebra}
 			\label{sec:linearAlgebra}
+			Basic principles of linear algebra are assumed to be well known by the reader, I want now to remark only the most important operators and definitions that we need to face the definition of the following quantum mechanical theorems we need to define a quantum device. The most important notions we need to acquire from this section are: \emph{tensor product, Hilbert space, bra-ket notation}.\\
+			
 			In order to realize a quantum computer we need understand how to define a state that is able to contain information that can be used to obtain a certain objective. As we will see in the next section, the state of a quantum device is a quantum state, thus a mathematical model that lives into a specific \emph{vector state} whose dimension depends on the amount of information it needs to take care of. Typically, significant states contain information that results from the composition of several spaces combined together thanks to a particular operator called tensor product.
 			
-			\paragraph{Definition (Tensor Product):} \emph{Given two vector spaces V and W over a field K with bases $e_1,..., e_m$ and$f_1,..., f_n$ respectively, the tensor product $V \otimes W$ is another vector space over K of dimensionmn. The tensor product space is equipped with a bilinear operation $\otimes : V \times W \rightarrow V \otimes W$. Thevector space $V \otimes W$ has basis $e_i \otimes f_j \forall i = 1,...,m, j = 1,...,n$}.
+			\paragraph{Definition (Tensor Product):} \emph{Given two vector spaces V and W over a field K with bases $e_1,..., e_m$ and
+$f_1,..., f_n$ respectively, the tensor product $V \otimes W$ is another vector space over K of dimension
+mn. The tensor product space is equipped with a bilinear operation $\otimes : V \times W \rightarrow V \otimes W$. The
+vector space $V \otimes W$ has basis $e_i \otimes f_j \forall i = 1,...,m, j = 1,...,n$}. \\
 			
 			Typically we are going to work with complex Euclidean vector spaces of the form $\mathbb{C}^n$ and, by choosing the standard basis in the origin vector spaces, then the tensor product is nothing more than the Kronecker product.
 			
@@ -49,9 +64,79 @@
 				\end{pmatrix}
 				$
 			\end{center}
+		
+			Now that we know the notions of vector state and Tensor product, we can use them to define an important space (in particular for the SAT problem we are going to study later) called the \textbf{Hilbert space} and denoted with $\mathcal{H}$.
+			
+			\paragraph{Definition (Hilbert Space):} \emph{Given the complex space $\mathbb{C}$ we define the Hilbert space $\mathcal{H}$ as the (n + 1)-tuple tensor product:}
+			\begin{center}
+				$
+				\mathcal{H} := \sbigotimes_1^{n+1} \mathbb{C}^{2}
+				$
+			\end{center}
+		
+			As we said, in the Hilbert space we will carry the discussion of the SAT problem but to understand what the result of this tensor product actually defines we still need to give probably the most important definition. In order to represent a quantum state we use the so called \emph{bra-ket notation} introduced in 1939 by Paul Dirac.
+			
+			\paragraph{Definition (Dirac/bra-ket Notation):} \emph{Given a complex Euclidean space $\mathbb{S} \equiv \mathbb{C}^{n}$, $|\psi\rangle \in \mathbb{S}$ denotes a column vector, and $\langle\psi| \in \mathbb{S}^{*}$ denotes a row vector that is the conjugate transpose of $|\psi\rangle$, i.i. $\langle\psi| = |\psi\rangle$. The vector $|\psi\rangle$ is also called a ket, while the vector $\langle\psi|$ is also called a bra.} \\
+			
+			The bra-ket notation allows us to define a quantum state, hence a vector that lives into a particular vector space. Its definition intrinsically defines also the result of combining two states living in the same state with the \textbf{inner product}, straightforwardly obtained from what we have just said: $\langle\psi|\phi\rangle$. This result is fundamental to define spaces that are higher than one only dimension as the Hilbert state presented before. To understand what $\mathcal{H}$ is we can now use two examples where we define the basis of the first two results obtained by doing the tensor product of the complex space $\mathbb{C}^{2}$ with itself. Remember that the basis of a space is the smallest set of linearly independent vectors that can be used to represents all the vectors that belong to that space.
+			
+			\paragraph{Example 1:} \emph{Considering the basic case of $\mathbb{C}^{2}$ the basis can be trivially identified as:}
+			\begin{center}
+				$|0\rangle = \zeroket \hspace{1cm} |1\rangle = \begin{pmatrix} 0 \\ 1 \end{pmatrix}$
+			\end{center}
+		
+			\paragraph{Example 2:} \emph{Considering a single product, thus $\sbigotimes_1^{1} \mathbb{C}^{2} = \mathbb{C}^{2} \otimes \mathbb{C}^{2}$, we obtain the basis by multiplying in all possible ways the vectors of the basis of the previous example. We now have kets of dimension 2, thus vectors with 4 lines and 1 column:}
+			\begin{center}
+					$
+					|00\rangle = |0\rangle \otimes |0\rangle = \zeroket \otimes \zeroket = 
+					\begin{pmatrix}
+					1\zeroket \vspace{3pt} \\
+					0\zeroket
+					\end{pmatrix} =
+					\begin{pmatrix}
+					1 \\ 0 \\ 0 \\ 0
+					\end{pmatrix}
+					$\vfill
+					$
+					|01\rangle = |0\rangle \otimes |1\rangle = \zeroket \otimes \oneket = 
+					\begin{pmatrix}
+					1\oneket \vspace{3pt} \\
+					0\oneket
+					\end{pmatrix} =
+					\begin{pmatrix}
+					0 \\ 1 \\ 0 \\ 0
+					\end{pmatrix}
+					$ \vfill
+					$
+					|10\rangle = |1\rangle \otimes |0\rangle = \oneket \otimes \zeroket = 
+					\begin{pmatrix}
+					0\zeroket \vspace{3pt} \\
+					1\zeroket
+					\end{pmatrix} =
+					\begin{pmatrix}
+					0 \\ 0 \\ 1 \\ 0
+					\end{pmatrix}
+					$ \vfill
+					$
+					|11\rangle = |1\rangle \otimes |1\rangle = \oneket \otimes \oneket = 
+					\begin{pmatrix}
+					0\oneket \vspace{3pt} \\
+					1\oneket
+					\end{pmatrix} =
+					\begin{pmatrix}
+					0 \\ 0 \\ 0 \\ 1
+					\end{pmatrix}
+					$
+			\end{center}
+		
+			Thanks to these two examples we can generalize to the n + 1 case and obtain the definition of the Hilbert space we gave before. \\
+			
+			We have now recovered all the fundamentals of linear algebra that are needed in order to start talking of quantum physics, in particular we will begin with the smallest unit of information, the so called \textbf{qubit}.
 						
 			\subsubsection{Quantum Mechanics}
 			\label{sec:quantumMechanics}
+			
+			
 			
 			\subsubsection{The Quantum Computer}
 			\label{sec:quantumComputer}
