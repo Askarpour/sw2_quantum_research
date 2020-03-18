@@ -3,18 +3,21 @@
 % packages
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
-\usepackage[english]{babel}
+\usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage{amssymb}
 \usepackage{amsmath}
+\usepackage[toc,page]{appendix}
+\usepackage{listings}
 
 % commands
 \newcommand{\sbigotimes}{%
 	\mathop{\mathchoice{\textstyle\bigotimes}{\bigotimes}{\bigotimes}{\bigotimes}}%
 }
-
 \newcommand{\zeroket}{\begin{pmatrix} 1 \\ 0 \end{pmatrix}}
 \newcommand{\oneket}{\begin{pmatrix} 0 \\ 1 \end{pmatrix}}
+
+\graphicspath{{img/}}
 
 \begin{document}
 	\title{An Introduction to Quantum Computing for Computer Scientists, with SAT}
@@ -24,6 +27,12 @@
 	\begin{abstract}
 		This is the paper I have produced during my study of quantum computing for solving the SAT problem...
 	\end{abstract}
+
+	% definire meglio la struttura ci sono:
+	% definizioni
+	% esempi
+	% riferimenti al codice nell appendice
+	% important conclusions
 	
 	\section*{Introduction}
 	\label{sec:introduction}
@@ -80,12 +89,16 @@ vector space $V \otimes W$ has basis $e_i \otimes f_j \forall i = 1,...,m, j = 1
 			
 			The bra-ket notation allows us to define a quantum state, hence a vector that lives into a particular vector space. Its definition intrinsically defines also the result of combining two states living in the same state with the \textbf{inner product}, straightforwardly obtained from what we have just said: $\langle\psi|\phi\rangle$. This result is fundamental to define spaces that are higher than one only dimension as the Hilbert state presented before. To understand what $\mathcal{H}$ is we can now use two examples where we define the basis of the first two results obtained by doing the tensor product of the complex space $\mathbb{C}^{2}$ with itself. Remember that the basis of a space is the smallest set of linearly independent vectors that can be used to represents all the vectors that belong to that space.
 			
-			\paragraph{Example 1:} \emph{Considering the basic case of $\mathbb{C}^{2}$ the basis can be trivially identified as:}
+			\paragraph{Example 1:} 
+			\label{ex:c2}
+			\emph{Considering the basic case of $\mathbb{C}^{2}$ the basis can be trivially identified as:}
 			\begin{center}
 				$|0\rangle = \zeroket \hspace{1cm} |1\rangle = \begin{pmatrix} 0 \\ 1 \end{pmatrix}$
 			\end{center}
 		
-			\paragraph{Example 2:} \emph{Considering a single product, thus $\sbigotimes_1^{1} \mathbb{C}^{2} = \mathbb{C}^{2} \otimes \mathbb{C}^{2}$, we obtain the basis by multiplying in all possible ways the vectors of the basis of the previous example. We now have kets of dimension 2, thus vectors with 4 lines and 1 column:}
+			\paragraph{Example 2:} 
+			\label{ex:c4}
+			\emph{Considering a single product, thus $\sbigotimes_1^{1} \mathbb{C}^{2} = \mathbb{C}^{2} \otimes \mathbb{C}^{2}$, we obtain the basis by multiplying in all possible ways the vectors of the basis of the previous example. We now have kets of dimension 2, thus vectors with 4 lines and 1 column:}
 			\begin{center}
 					$
 					|00\rangle = |0\rangle \otimes |0\rangle = \zeroket \otimes \zeroket = 
@@ -135,8 +148,63 @@ vector space $V \otimes W$ has basis $e_i \otimes f_j \forall i = 1,...,m, j = 1
 						
 			\subsubsection{Quantum Mechanics}
 			\label{sec:quantumMechanics}
+				Quantum mechanics is a fundamental theory in physics describing the properties of nature. We do not need entirely its entire power for our purpose but, starting from some basic concepts we will exploit some conclusions that are useful to design an algorithm that is faster than its classical counterpart. As we do when we start studying computer science, we want to identify the smallest, most basic element that allows us to represent the information. From a classical point of view we have the \textbf{bit} whose values can be either 1 or 0. From a quantum point of view, instead, we have the \textbf{qubit}, complex variables that can assume values ranging from 0 to 1 (in modulus), identified in a complex space over a surface called the \emph{Block Sphere}.
+				
+				\paragraph{Definition (Qubit:)} \emph{The qubit is the smallest unit of measurement used to quantify information in quantum computing. It identifies the bit in a superposition, hence both 0 and 1 values are considered. Formally it is a vector of the space $\mathbb{C}^{2}$ represented as a linear combination of the elements contained in its basis (\ref{ex:c2}). A qubit $\psi$, with $\alpha_0,\alpha_1\in\mathbb{C}$, is defined as:}\\
+				\begin{center}
+					$
+					|\psi\rangle = \alpha_0 |0\rangle + \alpha_1 |1\rangle = \alpha_0\zeroket + \alpha_1\oneket
+					$
+				\end{center}
+				
+				To understand better the definition of the qubit we now provide its representation in a tridimensional space whose directions are obtained from basic linear algebra principles that are not now relevant. We now just need to understand that, thanks to the coefficients $\alpha_0$ and $\alpha_1$ belonging to the complex space $\mathbb{C}$ we are able to consider the basic element of our computation as one of the infinite points that live over the surface of a sphere. We can grasp in this concept a first hint in the advantages that quantum states provide with respect their classic counterpart.
+				
+				\paragraph{Definition (Block Sphere):} \emph{The Block Sphere is the geometrical representation of the pure state space of a two-level quantum mechanical system. In other words it represents all the possible vectors that can be obtained by combining the vectors of the basis for a quantum register of 1 qubit.}\\
+				
+				Consider the following examples to understand how vectors are represented in the Bloch sphere; we present the trivial cases for both $|0\rangle$ and $|1\rangle$ and the respective orthogonal vectors identifying the x and y axes.
+				
+				\newpage
+				
+				\paragraph{Example 3:} \emph{Consider the qubit $\psi$, with $\alpha_0,\alpha_1\in\mathbb{C}$, such that: 	$|\psi\rangle = \alpha_0 |0\rangle + \alpha_1 |1\rangle$. (Check code at \ref{c:example3})}
+				
+				\begin{enumerate}
+					\centering
+					\begin{figure}[h]
+						\begin{minipage}{0.4\textwidth}
+							\item $\alpha_0=1, \;\alpha_1=0$
+							\centering
+							\includegraphics[scale=0.4]{zeroket.png}
+							\caption{$|\psi\rangle= |0\rangle$}
+						\end{minipage} \hfill
+						\begin{minipage}{0.4\textwidth}
+							\item $\alpha_0=0, \;\alpha_1=1$
+							\includegraphics[scale=0.4]{oneket.png}
+							\caption{$|\psi\rangle= |1\rangle$}
+						\end{minipage}
+					\end{figure}
+					\begin{figure}[h]
+						\begin{minipage}{0.4\textwidth}
+							\item $\alpha_0=\frac{1}{\sqrt{2}}, \;\alpha_1=\frac{1}{\sqrt{2}}$
+							\includegraphics[scale=0.4]{xket.png}
+							\caption{$|\psi\rangle = \frac{1}{\sqrt{2}}(|0\rangle+|1\rangle)$}
+						\end{minipage} \hfill
+						\begin{minipage}{0.4\textwidth}
+							\item $\alpha_0=\frac{1}{\sqrt{2}}, \;\alpha_1=\frac{i}{\sqrt{2}}$
+							\includegraphics[scale=0.4]{yket.png}
+							\caption{$|\psi\rangle = \frac{1}{\sqrt{2}}(|0\rangle+i|1\rangle)$}
+						\end{minipage}
+					\end{figure}
+				\end{enumerate}
 			
+			Obviously we can also represent vectors that belong to spaces with a higher dimension than 2, in this case we will have their representation over a hypersphere (check the plot\_bloch\_multivector method in the qiskit library). As in classical computer we haver registers, defined as a sequence of bits, in quantum computing we have \emph{quantum-registers} composed of a sequence of qubits. Typically a quantum computer has a single quantum-register made up of qubits (see section \ref{sec:quantumComputer}). It is now important to remark the first important conclusion on quantum computing, that derives from the definition of quantum-register that we have just provided. We see that $\sbigotimes_1^{n+1} \mathbb{C}^{2}$ is a $2^{n}$ dimensional space. This is sharp in contrast with what happens for classical registers: given n classical bits, their state is a binary string in $\{0,1\}^{n}$, thus an n-dimensional space. In other words:
 			
+			\paragraph{Conclusion 1:} \emph{the dimension of the state space of quantum registers grows exponentially in the number of qubits, whereas the dimension of the state space of classical registers grows linearly in the number of bits.}
+			
+			\subsubsection{Superposition}
+			\label{sec:superposition}
+			
+			\subsubsection{Entanglement}
+			\label{sec:entanglement}
 			
 			\subsubsection{The Quantum Computer}
 			\label{sec:quantumComputer}
@@ -162,6 +230,20 @@ vector space $V \otimes W$ has basis $e_i \otimes f_j \forall i = 1,...,m, j = 1
 		
 	\section{Conclusions}
 	\label{sec:conclusions}
+	
+	\begin{appendices}
+		\section{Qiskit}
+		\label{sec:qiskit}
+		
+		\section{Code with Qiskit}
+		This section contains the list of the snippets of code needed to represent the examples used in the paper. To replicate them consider ti import the following libraries:
+		\lstinputlisting[language=python]{code/imports.py}
+		
+		\label{sec:codeWithQiskit}
+			\begin{enumerate}
+				\item \label{c:example3} \lstinputlisting[language=python]{code/example3.py}
+			\end{enumerate}
+	\end{appendices}
 	
 	\clearpage
 	\bibliographystyle{plain}
