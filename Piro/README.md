@@ -33,15 +33,15 @@ computational theory thanks to its belonging to the NP-Complete problems family.
 The repository contains almost all the material I have used to realize the research project and its most relevant
 content are for sure: the quantum algorithms realized to solve the SAT problem and the final report.
 
-In particular the repository contains:
-    
-    * Code: this folder is split in the two different versions of the algorithm used to solve the SAT problem. Classic
+In particular the repository contains: 
+- __Code__: this folder is split in the two different versions of the algorithm used to solve the SAT problem. Classic
             folder contains an efficient implementation of the algorithm realized by [Sahand Saba](https://github.com/sahands);
             while Quantum folder contains a notebook where qiskit's solver for the SAT problem is used and another folder,
             Exactly_1 where I realized my algorithm using Grover's search to solve a simplified instance of the SAT.
-    * Papers: this folder contains the most important papers I have used to realize this project. It is also split in 
+            
+- __Papers__: this folder contains the most important papers I have used to realize this project. It is also split in 
               two to make a distintion between the papers focused on computational theory and quantum computing.
-    * Report: contains the tex files and the final pdf for the documentation of the entire project. In particular
+              
+- __Report__: contains the tex files and the final pdf for the documentation of the entire project. In particular
               [this](https://github.com/Askarpour/sw2_quantum_research/blob/master/Piro/Report/Paper/QuantumSAT.pdf) is
               the final paper of the entire work done.
-    
