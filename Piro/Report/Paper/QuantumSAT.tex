@@ -1,4 +1,6 @@
 \documentclass[english]{article}
+\input{qcircuit.sty}
+
 
 % packages
 \usepackage[T1]{fontenc}
@@ -9,6 +11,9 @@
 \usepackage{amsmath}
 \usepackage[toc,page]{appendix}
 \usepackage{listings}
+\usepackage{enumitem}
+\usepackage{tikz}
+\usepackage{braket}
 
 % commands
 \newcommand{\sbigotimes}{%
@@ -144,9 +149,13 @@ vector space $V \otimes W$ has basis $e_i \otimes f_j \forall i = 1,...,m, j = 1
 		
 			Thanks to these two examples we can generalize to the n + 1 case and obtain the definition of the Hilbert space we gave before. \\
 			
-			We have now recovered all the fundamentals of linear algebra that are needed in order to start talking of quantum physics, in particular we will begin with the smallest unit of information, the so called \textbf{qubit}.
+			Before starting with the quantum physics section where we will start by defining the smallest unit element we use to represent information, the so called \textbf{qubit}, we need to give one further definition. In order to perform operations on qubits we will consider (section \ref{sec:operationsOnQubits}) only a particular family of matrices called unitary matrices. These matrices allow to perform operations on qubits without modifying the basic properties of the quantum state and are defined as follows.
+			
+			\paragraph{Definition (Unitary Matrix):} \emph{A complex square matrix $\mathcal{U}$ is unitary if $U^{*}U = UU^{*} = I$.} \\
+			
+			Unitary matrices have significant importance in quantum mechanics because they are \textbf{norm-preserving}, this will be fundamental to identify the two main features of quantum operations that can now be introduced as: \emph{apply a unitary matrix on a quantum state, thus a vector whose norm will be preserved}.
 						
-			\subsubsection{Quantum Mechanics}
+			\subsubsection{Quantum Physics}
 			\label{sec:quantumMechanics}
 				Quantum mechanics is a fundamental theory in physics describing the properties of nature. We do not need entirely its entire power for our purpose but, starting from some basic concepts we will exploit some conclusions that are useful to design an algorithm that is faster than its classical counterpart. As we do when we start studying computer science, we want to identify the smallest, most basic element that allows us to represent the information. From a classical point of view we have the \textbf{bit} whose values can be either 1 or 0. From a quantum point of view, instead, we have the \textbf{qubit}, complex variables that can assume values ranging from 0 to 1 (in modulus), identified in a complex space over a surface called the \emph{Block Sphere}.
 				
@@ -162,9 +171,7 @@ vector space $V \otimes W$ has basis $e_i \otimes f_j \forall i = 1,...,m, j = 1
 				\paragraph{Definition (Block Sphere):} \emph{The Block Sphere is the geometrical representation of the pure state space of a two-level quantum mechanical system. In other words it represents all the possible vectors that can be obtained by combining the vectors of the basis for a quantum register of 1 qubit.}\\
 				
 				Consider the following examples to understand how vectors are represented in the Bloch sphere; we present the trivial cases for both $|0\rangle$ and $|1\rangle$ and the respective orthogonal vectors identifying the x and y axes.
-				
-				\newpage
-				
+	
 				\paragraph{Example 3:} \emph{Consider the qubit $\psi$, with $\alpha_0,\alpha_1\in\mathbb{C}$, such that: 	$|\psi\rangle = \alpha_0 |0\rangle + \alpha_1 |1\rangle$. (Check code at \ref{c:example3})}
 				
 				\begin{enumerate}
@@ -196,29 +203,311 @@ vector space $V \otimes W$ has basis $e_i \otimes f_j \forall i = 1,...,m, j = 1
 					\end{figure}
 				\end{enumerate}
 			
-			Obviously we can also represent vectors that belong to spaces with a higher dimension than 2, in this case we will have their representation over a hypersphere (check the plot\_bloch\_multivector method in the qiskit library). As in classical computer we haver registers, defined as a sequence of bits, in quantum computing we have \emph{quantum-registers} composed of a sequence of qubits. Typically a quantum computer has a single quantum-register made up of qubits (see section \ref{sec:quantumComputer}). It is now important to remark the first important conclusion on quantum computing, that derives from the definition of quantum-register that we have just provided. We see that $\sbigotimes_1^{n+1} \mathbb{C}^{2}$ is a $2^{n}$ dimensional space. This is sharp in contrast with what happens for classical registers: given n classical bits, their state is a binary string in $\{0,1\}^{n}$, thus an n-dimensional space. In other words:
+			Obviously we can also represent vectors that belong to spaces with a higher dimension than 2, in this case we will have their representation over a hypersphere (check the plot\_bloch\_multivector method in the qiskit library). As in classical computer we haver registers, defined as a sequence of bits, in quantum computing we have \emph{quantum-registers} composed of a sequence of qubits. Typically a quantum computer has a single quantum-register made up of qubits (see section \ref{sec:quantumComputer}). It is now important to remark the first important conclusion on quantum computing, that derives from the definition of quantum-register that we have just provided. We see that $\sbigotimes_1^{n+1} \mathbb{C}^{2}$ is a $2^{n}$ dimensional space. This is sharp in contrast with what happens for classical registers: given n classical bits, their state is a binary string in $\{0,1\}^{n}$, thus an n-dimensional space. In other words we arrive to the first important conclusion.
 			
 			\paragraph{Conclusion 1:} \emph{the dimension of the state space of quantum registers grows exponentially in the number of qubits, whereas the dimension of the state space of classical registers grows linearly in the number of bits.}
 			
 			\subsubsection{Superposition}
 			\label{sec:superposition}
+				The mathematical definition of the qubit we have just seen is useful to understand the first difference between the representation of a state either in classical or quantum fields. We want now to define from a more physical point of view what means for a qubit to assume both the value 0 and 1. The basic physical principle behind this property is the \emph{Heisenberg indetermination principle}, but without going too deep in the details let's try to understand it with a simple example. 
+				
+				\paragraph{Example 4:} \emph{We have seen that bits can assume at a certain time instant one and one value only. Considering now a qubit we could say that it assumed both the values 1 and 0 because its definition is based on Heisenberg's principle, basically stating that particles can assume at the same time different positions. This is a physics principle: electrons can be at the same time in different positions. That is why considering the position 0 and the position 1 we can say that a qubit is situated in both of them. The sad reality is that we do not know the real state of the qubit until we perform a specific operation on it, called measurement, which makes it collapse either to a 0 or a 1 "boring" bit. The following picture tries to illustrate the principle of an electron whose real position is not deterministic until this operation.}
+				
+				\begin{figure}[h]
+					\centering
+					\includegraphics[scale=0.75]{superposition.png}
+					\caption{Superposition of the electron}
+				\end{figure}
+			
+				As we may have understood superposition is a very interesting property, also because it can be generalized to the case of n qubits rather than just one. We will se in the implementation of the SAT algorithm how operations on multiple qubits are able to exploit superposition in order to compute the solution of the problem. With this property we can start guessing how algorithms will be run on our quantum computer: from a certain initial state we will perform operations that exploit the indetermination principle over the qubits, thus considering several states at the same time, until the end when performing the measurement we will make them collapse to a single string of 1s and 0s which is our result.
 			
 			\subsubsection{Entanglement}
 			\label{sec:entanglement}
+				Entanglement is the second main feature of quantum computers that, together with superposition, differentiates them from quantum computers. These are in fact the two main features that are exploited in algorithms to find the solution of a problem. \\
+				
+				To understand entanglement we start by answering the following question: \\ \\				
+				$\underline{What \; do \; we \; gain \; by \; moving \; from \; single \; qubits \; spaces \; to \; multiple \; qubits \; spaces?}$ \\
+				
+				The answer has two motivations, the first regarding the states representation the second the property of entanglement:
+				\begin{enumerate}[label=(\roman*)]
+					\item As we described before, also in quantum computing we will need to define registers that contain more than 1 qubit. To do so it suffices to compose a vector of n qubits which identify the state obtained by the result of their quantum product.
+					
+					\item Linear algebra definitions, in particular for what concerns the tensor products, show that not every state that we consider can be represented as the tensor product of n-qubits. Whenever we have to deal with a state of that kind we will say that the quantum state is entangled.
+				\end{enumerate}
 			
-			\subsubsection{The Quantum Computer}
-			\label{sec:quantumComputer}
+				More formally the definition of entanglement is the following:
+				
+				\paragraph{Definition (Entanglement):} \emph{A quantum state $|\psi\rangle \in \sbigotimes_1^{n+1} \mathbb{C}^{2}$ is a product state if it can be expressed as a tensor product $|\psi_0\rangle \otimes |\psi_1\rangle \otimes \cdots \otimes |\psi_n\rangle$ of n 1-qubit states. Otherwise, it is entangled.} \\
+				
+				To understand better the definition let's consider the simplest example possible: considering a state living in the $\mathbb{C}^4$ complex space we want to check if it is a product state or entangled by looking for two 1-qubit states whose tensor product is the state that we are dealing with. We will see next how the entanglement feature can be used, in particular what still happens when 2 qubits are entangled together.
+				
+				\paragraph{Example 5:} \emph{Consider the following 2-qubit state:
+				\begin{align*}
+					\frac{1}{2}|00\rangle+\frac{1}{2}|01\rangle+\frac{1}{2}|10\rangle+\frac{1}{2}|11\rangle
+				\end{align*} 
+				This is a product state because we can find two states whose tensor product is the starting one: $\frac{1}{2}(|0\rangle+|1\rangle)\otimes\frac{1}{2}(|0\rangle+|1\rangle)$. By contrast, the 2-qubit state:
+				\begin{align*}
+					\frac{1}{\sqrt{2}}|00\rangle+\frac{1}{\sqrt{2}}|11\rangle
+				\end{align*}
+				is an entangled state, because it can not be expressed as the tensor product of two 1-qubit states.} \\
+			
+				The actual meaning of entanglement can be fully appreciated only once we have defined the measurement, but we can start grasping its importance thanks to the algebraic definition that we have just provided. Having an entangled state means that we can not find two qubits whose tensor product result is the one that we are considering, this because there are not two "linearly independent" states satisfying such property. In conclusion the qubits that compose an entangled state are in some way related one with the other, in other words: \emph{when two or more qubits are entangled, they affect each other, and measuring one qubit changes the probability distribution for the other qubits.}
+				
+			\subsubsection{Operations on Qubits}
+			\label{sec:operationsOnQubits}
+				The definition of qubit should be clear now, moreover we have also understood that a quantum computer is composed of a quantum register where multiple qubits are used in order to move from a state to another. We want now to understand how to perform operations on qubits (without breaking the basic properties of the quantum state) so that we can implement algorithms that allow to solve problems incrementally going through different quantum states. First of all we have to give the definition of a quantum operation on n qubits:
+				
+				\paragraph{Definition (Quantum Gates):} \emph{An operation performed by a quantum computer with n qubits, also called a gate, is a unitary matrix in $\mathbb{C}^{2^{n}\times2^{n}}$.} \\
+				
+				Thus, for an n-qubit system, the quantum state is a unit vector $|\psi\rangle\in\mathbb{C}^{2^{n}}$, while a quantum operation is a matrix $U\in\mathbb{C}^{2^{n}\times2^{n}}$, and the application of U onto the state $|\psi\rangle$ is the unit vector $U|\psi\rangle\in\mathbb{C}^{2^{n}}$. This leads to the following important features of quantum gates:
+				\begin{itemize}
+					\item Quantum operations are \textbf{linear}
+					\item Quantum operations are \textbf{reversible}
+				\end{itemize}
+				Every significant operation on a quantum state must be represented as a unitary matrix, this may seem very restrictive but it has been proved that these two features do not remove any power to the quantum computer we want to design. We can now give the following important conclusion.
+				
+				\paragraph{Conclusion 2:} \emph{A universal quantum computer is Turing-complete.}\\
+				
+				Now that we know how quantum operations are formally defined we have to show first how they operate over a set of qubits and second which are the most important gates that we need to implement quantum algorithms. A quantum algorithm is implemented with a quantum circuit: a quantum circuit is represented by indicating which operations are performed on each qubit or group of qubits. For a quantum computer with n qubits, we represent n qubits lines and operations as blocks taking as input a set of qubits and with output the same input lines. Consider the following picture as the first trivial representation where a general unitary matrix $U$ is applied over all the qubits of the quantum computer. 
+				
+				\begin{figure}[h]
+					\centering
+					\begin{minipage}{0.6\textwidth}
+						\Qcircuit @C=1em @R=.7em {
+							\lstick{\ket{q_0}} & \multigate{2}{U} & \qw \\
+							\lstick{\ket{q_1}} & \ghost{U} & \qw \\
+							\lstick{\ket{q_2}} & \ghost{U} & \qw			
+						}
+					\end{minipage}
+					\hspace{0.3cm}
+					$\equiv$
+					\hspace{1cm}
+					\begin{minipage}{0.6\textwidth}
+						\Qcircuit @C=1em @R=.7em {
+							\lstick{\ket{q_0}} & \gate{U} & \qw \\
+							\lstick{\ket{q_1}} & \gate{U} & \qw \\
+							\lstick{\ket{q_2}} & \gate{U} & \qw			
+						}
+					\end{minipage}
+					\caption{Trivial equivalence of quantum circuits}
+				\end{figure}
+			
+				In the picture above we have used a slight abuse of notation for what concerns the multigate $U$ applied over the 3-qubit state. In mathematical terms, in fact, the equivalence holds when we consider the gate $U\otimes U\otimes U$ applied to the state composed of 3 qubits. Hence, the gate of the first circuit has to be interpreted as the unitary matrix obtained from the tensor product of 3 $U$ unitary matrices, thus living in the $\mathbb{C}^{8}$ space. \\
+				
+				Before going to study the fundamental gates we need to implement quantum algorithms it is very important to understand how to interpret the representation of a quantum circuit. Circuit diagrams are read from left to right, but because each gate corresponds to applying a matrix to the quantum state, the matrices corresponding to the gates should be written from right to left in the mathematical representation. In the following picture, for example, the result of the circuit is the state $BA\ket{\psi}$, obtained by first applying gate $A$ and then $B$.
+				
+				\begin{figure}[h]
+					\centering
+					\mbox{
+						\Qcircuit @C=1em @R=.7em {
+							& \multigate{2}{A} & \qw & \multigate{2}{B} & \qw \\
+							\lstick{\ket{\psi}} & \ghost{A} & \qw & \ghost{B} & \qw & \rstick{BA\ket{\psi}} \\
+							& \ghost{A} & \qw & \ghost{B} & \qw
+					}}
+					\caption{Quantum circuit interpretation}
+				\end{figure}
+			
+				So far it seems that every kind of unitary gate is allowed to be used in a quantum circuit, but as we are not allowed in classical algorithms to define every kind of function also in quantum computing we will define operations as unitary gates by combining a set of nice matrices which are efficiently specifiable and implementable. The only set of nice matrices we will consider in our study (which suffices to implement the SAT algorithm) are called the \emph{Pauli Operators} and they are defined as follows.
+				
+				\paragraph{Definition (Pauli Operators):} \emph{The Pauli operators are four single-qubit unitary matrices $I, X, Y, Z$ forming a basis for $\mathbb{C}^{2\times2}$ such that: $XYZ=iI$. The four matrices are:}
+				\begin{figure}[h]
+					\begin{minipage}{0.5\textwidth}
+						\centering
+						$
+						I = \begin{pmatrix}
+								1 & 0 \\
+								0 & 1
+						\end{pmatrix}
+						$\vspace{0.2cm}
+					\end{minipage}
+					\begin{minipage}{0.5\textwidth}
+						\centering
+						$
+						X = \begin{pmatrix}
+								0 & 1 \\
+								1 & 0
+						\end{pmatrix}
+						$\vspace{0.2cm}
+					\end{minipage}
+					\begin{minipage}{0.5\textwidth}
+						\centering
+						$
+						Y = \begin{pmatrix}
+								0 & -i \\
+								i & 0
+						\end{pmatrix}
+						$
+					\end{minipage}
+					\begin{minipage}{0.5\textwidth}
+						\centering
+						$
+						Z = \begin{pmatrix}
+								1 & 0 \\
+								0 & -1
+						\end{pmatrix}
+						$
+					\end{minipage}
+				\end{figure}
+			
+			\emph{With the definition it can be checked trivially that all $I, X, Y, Z$ are unitary.}\\
+			
+			Now that we know the Pauli set we can start to give the list of the most important operators we need to implement quantum algorithms by comparing them with the respective counterpart operations in classic computation:
+			
+			\begin{itemize} 
+				\item The $X$ gate is the equivalent to the NOT gate in classical computers. Thus we have: $X\ket{0} = \ket{1}$ and $X\ket{1} = \ket{0}$. 
+				
+				\item The $Z$ gate has no equivalent in classical computers because it performs a phase-flip on the target qubit. Thus we have: $Z\ket{0} = \ket{0}$ and $Z\ket{1}=-1$.
+				
+				\item Another single-qubit fundamental gate is the Hadamard gate $H$. $H$ is still a unitary matrix that belongs to the class of the \textbf{Clifford} gates, the characteristic property of a Clifford gate is to transform a Pauli operator in another Pauli operator. The Hadamard gate is defined as:
+				\begin{center}
+					$
+					H := \frac{1}{\sqrt{2}}
+					\begin{pmatrix}
+						1 & 1 \\
+						1 & -1
+					\end{pmatrix}
+					$
+				\end{center}
+				Applying a Hadamard to a qubit brings it to a superposition, we will see later that this is the fundamental initialization of several quantum algorithms. In fact: $H\ket{0} = \frac{1}{\sqrt{2}}(\ket{0}+\ket{1})$ and $H\ket{1}=\frac{1}{\sqrt{2}}(\ket{0}-\ket{1})$. 
+			\end{itemize}
+			% todo choose wheter to include or not the T gate and the universlity concept
+			
+			So far we have considered only single-qubit gates, let's continue our list with multiple qubit gates, starting from the basic ones and continuing with those obtained by computing a tensor product of the single qubit gates just seen.
+			
+			\begin{itemize}
+				\item The CNOT gate, also called "controlled NOT", acts on a 2-qubit state. The two qubit are called \emph{control} and \emph{target} qubits, and the CNOT gate works as follows: the target qubit is inverted if and only if the control qubit value is $\ket{1}$. The unitary matrix representing the CNOT gate is defined as:
+				
+				\begin{center}
+					$
+					CNOT := 
+					\begin{pmatrix}
+						1 & 0 & 0 & 0 \\
+						0 & 1 & 0 & 0 \\
+						0 & 0 & 0 & 1 \\
+						0 & 0 & 1 & 0
+					\end{pmatrix}
+					$
+				\end{center}
+			
+				As we may have guessed we have a clear analogy with the XOR gate in classical computers, in fact, as we see in the circuit representation the result is nothing more than the XOR between the control and the target qubit.
+				
+				\begin{figure}[h]
+					\centering
+					\mbox{
+					\Qcircuit @C=1em @R=.7em {
+							\lstick{\ket{A}} & \ctrl{1} & \qw & \rstick{\ket{A}} \\
+							\lstick{\ket{B}} & \targ & \qw & \rstick{\ket{A\oplus B}}
+					}}
+					\caption{The CNOT gate}
+				\end{figure}
+			
+				\item The SWAP gate is used to swap the control with the target qubit and it can be obtained by using a sequence of three CNOT gates. The SWAP operation on a quantum state maps it to a new quantum state in which every basis state has its i-th and j-th digit permuted. The circuit definition is provided as an equivalence with the sequence of CNOT gates that allow to implement it.
+				
+				\begin{figure}[h]
+					\centering
+					\begin{minipage}{0.6\textwidth}
+						\centering
+						\Qcircuit @C=1em @R=.7em {
+							\lstick{\ket{q_0}} & \ctrl{1} & \targ & \ctrl{1} & \qw & \rstick{\ket{q_1}} \\
+							\lstick{\ket{q_1}} & \targ & \ctrl{-1} & \targ & \qw & \rstick{\ket{q_0}}
+						}
+					\end{minipage}
+					\hspace{1cm}
+					$\equiv$
+					\hspace{1cm}
+					\begin{minipage}{0.6\textwidth}
+						\centering
+						\Qcircuit @C=1em @R=1.5em {
+							\lstick{\ket{q_0}} & \qswap & \qw & \rstick{\ket{q_1}} \\
+							\lstick{\ket{q_1}} & \qswap \qwx & \qw & \rstick{\ket{q_0}}
+						}
+					\end{minipage}
+					\caption{The SWAP gate}
+				\end{figure}
+			
+				\item The CNOT gate can be extended to more than two qubits only. If we consider two bits as control bits and one as target we obtain the "double controlled NOT" gate also known as the Toffoli gate. The generalized meaning of the CCNOT gate is: the control qubit is flipped if and only if both the control qubits values are $\ket{1}$. The unitary matrix representing the CCNOT gate is defined as:
+				
+				\begin{center}
+					$
+					CCNOT :=
+					\begin{pmatrix}
+						1 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
+						0 & 1 & 0 & 0 & 0 & 0 & 0 & 0\\
+						0 & 0 & 1 & 0 & 0 & 0 & 0 & 0\\
+						0 & 0 & 0 & 1 & 0 & 0 & 0 & 0\\
+						0 & 0 & 0 & 0 & 1 & 0 & 0 & 0\\
+						0 & 0 & 0 & 0 & 0 & 1 & 0 & 0\\
+						0 & 0 & 0 & 0 & 0 & 0 & 0 & 1\\
+						0 & 0 & 0 & 0 & 0 & 0 & 1 & 0
+					\end{pmatrix}
+					$
+				\end{center}
+			
+				If we consider as target qubit $\ket{0}$ we clearly see the analogy between the CCNOT gate and the AND classical gate. The result of applying it to two general control qubits $\ket{A}$ and $\ket{B}$ yields in fact to the logical formula shown in the circuit representation.
+				
+				\begin{figure}[h]
+					\centering
+					\mbox{
+					\Qcircuit @C=1em @R= 1em {
+						\lstick{\ket{A}} & \ctrl{1} & \qw & \rstick{\ket{A}} \\
+						\lstick{\ket{B}} & \ctrl{1} & \qw & \rstick{\ket{B}} \\
+						\lstick{\ket{0}} & \targ & \qw & \rstick{\ket{A \land B}}
+					}}
+					\caption{The CCNOT gate}
+				\end{figure}
+			
+				\item In general, as we saw at the beginning of this section we can build quantum gates by computing the tensor product of a set of nice unitary matrix, so to obtain another unitary matrix that maintains the basic properties of the quantum state on which we are acting. The most important example is to compute the Hadamard gate on all the n qubits of which a quantum computer is composed. This operations allows to bring the initial state in a \emph{superposition} so that we can continue performing quantum gates to implement our quantum algorithm. The formal definition of an n-Hadamard gate is:
+				
+				\begin{center}
+					\centering
+					$
+					\bigotimes^{n}\mathcal{H} = \frac{1}{\sqrt{2}}
+					\begin{pmatrix}
+						\bigotimes^{n-1}\mathcal{H} & \bigotimes^{n-1}\mathcal{H} \\
+						\bigotimes^{n-1}\mathcal{H} & -\bigotimes^{n-1}\mathcal{H}
+					\end{pmatrix}
+					$
+				\end{center}
+			\end{itemize}
+			
+			Now that we know the basic quantum gates and their relative counterpart in classical computers we can start to play with them in an example. Knowing in fact how to define a NOT and an AND gate we can do everything by exploiting the De Morgan laws.
+			
+			\paragraph{Example 6:} \emph{Consider the following clauses defining a 3-SAT problem over the variables $X_1, X_2, X_3$:}
+			\begin{align*}
+				C_0 = \{\neg X_1, X_2, X_3\} \\
+				C_1 = \{X_1, \neg X_2, X_3\}
+			\end{align*}
+			\emph{The problem is trivially satisfiable, but for now we are interested in its representation by using the gates that we have defined so far, knowing that the definition of satisfiability yields to check the possibility to assign the true value to the CNF of the clauses defining the problem. In our case the CNF becomes:}
+			\begin{align*}
+				CNF = (\neg X_1 \vee X_2 \vee X_3) \land (X_1 \vee \neg X_2 \vee X_3)
+			\end{align*}
+			\emph{And the quantum circuit corresponding to this instance can be obtained with the implementation available at the path: \textsc{/Code/Quantum/DecisionVersion}}. (Check the snippet of code for this example at (\ref{c:example6}))
+			
+			\newpage
+			
+			\begin{figure}[ht]
+				\centering
+				\includegraphics[scale=0.35]{example6.png}
+				\caption{CNF circuit}
+			\end{figure}
+	
+			% MEASUREMENT		
+				
+		\subsection{The Quantum Computer}
+		\label{sec:quantumComputer}
 			
 		\subsection{Grover's Algorithm}
 		\label{sec:grover}
 		
 	\section{Computational Theory}
 	\label{sec:computationalTheory}
+		
 		\subsection{SAT Problem}
 		\label{sec:sat}
 		
 	\section{SAT Implementation}
 	\label{sec:satImpl}
+		
 		\subsection{Classical}
 		\label{sec:satClassical}
 		
@@ -231,6 +520,7 @@ vector space $V \otimes W$ has basis $e_i \otimes f_j \forall i = 1,...,m, j = 1
 	\section{Conclusions}
 	\label{sec:conclusions}
 	
+	\clearpage
 	\begin{appendices}
 		\section{Qiskit}
 		\label{sec:qiskit}
@@ -242,6 +532,8 @@ vector space $V \otimes W$ has basis $e_i \otimes f_j \forall i = 1,...,m, j = 1
 		\label{sec:codeWithQiskit}
 			\begin{enumerate}
 				\item \label{c:example3} \lstinputlisting[language=python]{code/example3.py}
+				
+				\item \label{c:example6} \lstinputlisting[language=python]{code/example6.py}
 			\end{enumerate}
 	\end{appendices}
 	
