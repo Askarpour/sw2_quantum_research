@@ -448,7 +448,7 @@ vector space $V \otimes W$ has basis $e_i \otimes f_j \forall i = 1,...,m, j = 1
 				\begin{figure}[h]
 					\centering
 					\mbox{
-					\Qcircuit @C=1em @R= 1em {
+					\Qcircuit {
 						\lstick{\ket{A}} & \ctrl{1} & \qw & \rstick{\ket{A}} \\
 						\lstick{\ket{B}} & \ctrl{1} & \qw & \rstick{\ket{B}} \\
 						\lstick{\ket{0}} & \targ & \qw & \rstick{\ket{A \land B}}
@@ -485,16 +485,53 @@ vector space $V \otimes W$ has basis $e_i \otimes f_j \forall i = 1,...,m, j = 1
 			
 			\newpage
 			
-			\begin{figure}[ht]
+			
+			\begin{figure}[t]
+				\vspace{-2.7cm}
 				\centering
 				\includegraphics[scale=0.35]{example6.png}
 				\caption{CNF circuit}
 			\end{figure}
 	
-			% MEASUREMENT		
+			To conclude with this section we still need to define the fundamental operation that allows us to retrieve the information from a qubit. As we have already said for qubits, while our algorithm is running, they posses the superposition property which makes them not to be at a certain instant in an exact place. To access the qubit information we want to understand if at that instance it is placed in either the 0 or the 1 position. The operation that allows to bring the information carried by a qubit to a result, thus something interpretable is called \emph{measurement}. Measurements will be implemented on the relevant qubits of our quantum computer so that we can see at the end of the algorithm which is the real quantum state in which we are arrived. By measuring a qubit we are asking which is the highest probability of the qubit for being 1 or 0. Measurement is represented with the following block in a quantum circuit:
+			
+			\begin{figure}[h]
+				\centering
+				\mbox{
+					\Qcircuit @C=1em @R= 1em {
+						& \meter & \qw 
+				}}
+				\caption{The measurement gate}
+			\end{figure}
+		
+			It is important to understand that the outcome of a measurement will then be brought on a classical register where we will collect all the partial results measured from the relevant qubits of our circuit. As we saw in the introduction, the sad part of the story is that once we have measured a qubit it collapses to what we have called a "boring" unitary bit. This concept needs to be remembered also for what concerns the problem of copying a qubit that we will see later. Hence it is important to pose another important conclusion to the list.
+			
+			\paragraph{Conclusion 3:} \emph{The state of the quantum system after a measurement collapses to a linear combination of only those basis states that are consistent with the outcome of the measurement. The original quantum state is no longer recoverable.}	
 				
 		\subsection{The Quantum Computer}
 		\label{sec:quantumComputer}
+			We now have all the necessary to define the quantum device, and thanks to this formalism we will be also able to define further important conclusions, obtained by putting all together what we have seen so far. \\
+			
+			A quantum computer is not that different from how we consider a classical one in a general point of view. The device has a state and it evolves in other states by performing operations. The model of computation that is considered to formalize it is the quantum circuit model, which works as follows:
+			
+			\begin{itemize}
+				\item The quantum computer has a \emph{state} that is stored in a quantum register, initialized in a certain way at the beginning of the computation
+				
+				\item \emph{Quantum operations} applied on a state allow the quantum computer to evolve from a state to another
+				
+				\item At the end of the computation the information stored in the quantum register, thus the final state, contains the result
+			\end{itemize}
+		
+			Now it should be clear what to implement a quantum algorithm means and how the computation of a quantum algorithm is carried out on a quantum computer. Quantum algorithms are implemented on a quantum computer that provides a certain number of qubits to store the state. It is the programmer, knowing the quantum operations that we described in the previous section, who will make the states evolve in order to reach the one that contains the result. The best the quantum computer is realized the smaller the noise in the circuit will be. This means that the state will evolve with higher probability to the following expected one and that the measurements on the final state will return the expected result. \\
+			
+			To conclude with this part and start to study our first relevant quantum algorithm, we still have to conclude two more important features related properly to quantum algorithms. We have seen that measuring a quantum state makes it collapse so that it can not be reused. It seems natural hence to look for a way to copy a quantum state, for example to continue with another computation. However, in particular because of the property of quantum gates to be unitary matrices it turns out that cloning a quantum state is not possible. This yields to another important conclusion that we have always to keep in mind while defining quantum algorithms.
+			
+			\paragraph{Conclusion 4:} \emph{It is impossible to clone quantum states}.\\
+			
+			Hence, whenever we run a circuit that produces an output quantum state, in general we can reproduce the output quantum state only by repeating all the steps of the algorithm.
+			Another important aspect concerns the initialization of the quantum computer before starting to compute the algorithm. As we mentioned when we defined the Hadamard gate, by applying multiple Hadamards on the entire quantum state of the quantum computer we set the state to a uniform superposition. It is here that we can feel another time the extreme power of quantum computing with respect its classical counterpart.
+			
+			\paragraph{Conclusion 5:} \emph{Applying operations on a quantum device whose state is in a uniform superposition allows to apply them simultaneously to all possible binary strings thanks to linearity.} 
 			
 		\subsection{Grover's Algorithm}
 		\label{sec:grover}
