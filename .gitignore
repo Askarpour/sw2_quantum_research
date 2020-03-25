@@ -146,3 +146,13 @@ dmypy.json
 /Piro/Report/Paper/*.out
 /Piro/Report/Paper/*.blg
 /Piro/Report/Paper/*.bbl
+
+/Piro/Report/Presentation/*.log
+/Piro/Report/Presentation/*.aux
+/Piro/Report/Presentation/*.synctex.gz
+/Piro/Report/Presentation/*.toc
+/Piro/Report/Presentation/*.out
+/Piro/Report/Presentation/*.blg
+/Piro/Report/Presentation/*.bbl
+/Piro/Report/Presentation/*.nav
+/Piro/Report/Presentation/*.snm
