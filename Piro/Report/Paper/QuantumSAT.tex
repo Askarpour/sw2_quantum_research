@@ -185,6 +185,7 @@ vector space $V \otimes W$ has basis $e_i \otimes f_j \forall i = 1,...,m, j = 1
 						\end{minipage} \hfill
 						\begin{minipage}{0.4\textwidth}
 							\item $\alpha_0=0, \;\alpha_1=1$
+							\centering
 							\includegraphics[scale=0.4]{oneket.png}
 							\caption{$|\psi\rangle= |1\rangle$}
 						\end{minipage}
@@ -192,11 +193,13 @@ vector space $V \otimes W$ has basis $e_i \otimes f_j \forall i = 1,...,m, j = 1
 					\begin{figure}[h]
 						\begin{minipage}{0.4\textwidth}
 							\item $\alpha_0=\frac{1}{\sqrt{2}}, \;\alpha_1=\frac{1}{\sqrt{2}}$
+							\centering
 							\includegraphics[scale=0.4]{xket.png}
 							\caption{$|\psi\rangle = \frac{1}{\sqrt{2}}(|0\rangle+|1\rangle)$}
 						\end{minipage} \hfill
 						\begin{minipage}{0.4\textwidth}
 							\item $\alpha_0=\frac{1}{\sqrt{2}}, \;\alpha_1=\frac{i}{\sqrt{2}}$
+							\centering
 							\includegraphics[scale=0.4]{yket.png}
 							\caption{$|\psi\rangle = \frac{1}{\sqrt{2}}(|0\rangle+i|1\rangle)$}
 						\end{minipage}
@@ -266,7 +269,7 @@ vector space $V \otimes W$ has basis $e_i \otimes f_j \forall i = 1,...,m, j = 1
 				\end{itemize}
 				Every significant operation on a quantum state must be represented as a unitary matrix, this may seem very restrictive but it has been proved that these two features do not remove any power to the quantum computer we want to design. We can now give the following important conclusion.
 				
-				\paragraph{Conclusion 2:} \emph{A universal quantum computer is Turing-complete.}\\
+				\paragraph{Conclusion 2:} \label{conc:qcTuring}\emph{A universal quantum computer is Turing-complete.}\\
 				
 				Now that we know how quantum operations are formally defined we have to show first how they operate over a set of qubits and second which are the most important gates that we need to implement quantum algorithms. A quantum algorithm is implemented with a quantum circuit: a quantum circuit is represented by indicating which operations are performed on each qubit or group of qubits. For a quantum computer with n qubits, we represent n qubits lines and operations as blocks taking as input a set of qubits and with output the same input lines. Consider the following picture as the first trivial representation where a general unitary matrix $U$ is applied over all the qubits of the quantum computer. 
 				
@@ -472,7 +475,7 @@ vector space $V \otimes W$ has basis $e_i \otimes f_j \forall i = 1,...,m, j = 1
 			
 			Now that we know the basic quantum gates and their relative counterpart in classical computers we can start to play with them in an example. Knowing in fact how to define a NOT and an AND gate we can do everything by exploiting the De Morgan laws.
 			
-			\paragraph{Example 6:} \emph{Consider the following clauses defining a 3-SAT problem over the variables $X_1, X_2, X_3$:}
+			\paragraph{Example 6:} \label{ex:c6} \emph{Consider the following clauses defining a 3-SAT problem over the variables $X_1, X_2, X_3$:}
 			\begin{align*}
 				C_0 = \{\neg X_1, X_2, X_3\} \\
 				C_1 = \{X_1, \neg X_2, X_3\}
@@ -535,15 +538,226 @@ vector space $V \otimes W$ has basis $e_i \otimes f_j \forall i = 1,...,m, j = 1
 			
 		\subsection{Grover's Algorithm}
 		\label{sec:grover}
+			Being now able to understand what a quantum algorithm is and how it can be implemented on a quantum circuit, we can start to consider one of the most important algorithms that is used in quantum computing. Thanks to Grover's algorithm we will be able to appreciate how a real quantum algorithm is implemented and why we actually obtain a speedup with respect to its classical counterpart. This algorithm, as it is described in the paper by Grover (\cite{grover}), is a search algorithm in particular focused on looking for a certain element in a database. Hence the most important feature we will conclude is a \textbf{quadratic} speedup with respect to the most efficient search algorithm that we can implement classically. To exploit this feature we will use Grover's algorithm to solve the SAT problem and compare the computation complexity with a very efficient classical algorithm found on the web. 
+			
+			\paragraph{Basic Idea:} \emph{start with the uniform superposition of all basis states, and iteratively increase the coefficients of basis states that correspond to binary strings for which the unknown function gives output 1.} \\
+			
+			This means that iteratively we will perform a set of operations that allow to increment the coefficient of the correct solution that will be retrieved at the end thanks to the measurement operation. The algorithm requires $q = n + 1$ qubits to perform the basic operations but we will see in our implementation, as in many generalized cases happens, that some more qubits will be needed in order to perform intermediate steps that allow to generalize the algorithm. The qubits used to perform intermediate operations are typically called \emph{ancilla qubits} and it is very important to manage them as best as we can to prevent their exponential growth, caring of the \emph{no-cloning} conclusion we defined before.
+			
+			\paragraph{Outline:} \emph{Grover's algorithm starts with the uniform superposition of all basis states on n qubits. The last $n + 1$ qubit is already an auxiliary qubit and it is initialized as $H\ket{1}$. Thus we obtain the initial quantum state $\ket{\psi_0}$ and the following are iteratively repeated:
+			\begin{enumerate}
+				\item Flip the sign of the vectors for which $U_f$ gives output 1.
+				\item Invert all the coefficients of the quantum state around the average coefficient.
+			\end{enumerate}
+			A full cycle of these iterations increases the coefficients of the vectors that have been flipped at the first step. Continuing to iterate this cycles allows to make the coefficient get always nearer to 1 until we perform the measurement to obtain the result that is the closest to 1. This phenomenon is known as \textbf{Amplitude Amplification}, the basis of Grover's algorithm but also the most important thing to take care of (doing too many iterations may lead to solutions that are completely wrong!).} \\
 		
+			Considering now the function we are interested in to implement Grover's algorithm we first consider how a classical search would allow us to find a solution and then we define the 3 steps that are necessary to implement the quantum algorithm. Let $f:\{0,1\}^n \rightarrow \{0,1\}$, and assume that there exists a unique vector $\underline{s}\in\{0,1\}^n : f(\underline{s}) = 1$, i.e., there is a unique element in the domain of the function that yields output 1. We want to determine $\underline{s}$. The algorithm will run assuming that the function $f$ is encoded by a unitary matrix that we will consider as $\mathcal{U}_f$.
+			
+			\subsubsection{Classical Grover}
+			\label{sec:groverClass}
+				Now that we know how the search problem is defined, given the function $f$ introduced above, we have clear in mind that classical search cannot do better than $\mathcal{O}(2^n)$ operations. Indeed, as we will precisely describe at the beginning of the SAT implementation section (\ref{sec:satImpl}), we can design classical algorithms in both deterministic or nondeterministic paradigms. Nondeterminism is obtained with randomization and it provides in general more efficient algorithms but very complex to be designed and debugged. Any deterministic classical algorithm may need to explore all $2^n$ possible input values before finding $\underline{s}$: given any deterministic classical algorithm, there exists a permutation $\pi$ of $\{0,1\}^n$ that represents the longest execution path of such algorithm. Then, if $\underline{s} = \pi(\underline{1})$ the algorithm will require $2^n$ \textbf{queries} (important to understand query complexity described at \ref{conc:queryCompl}) to determine the answer, which is clearly the worst case. At the same time, a randomized algorithm requires $\mathcal{O}(2^n)$ function calls to have at least a constant positive probability to determine $\underline{s}$; the expected number of function calls to determine the answer is approximately $2^{2-1}$.
+			
+			\subsubsection{Quantum Grover}
+			\label{sec:groverQuant}
+				In the beginning of the section we have provided all the elements that we need to realize Grover's algorithm, as we said there are 3 steps that are iteratively repeated in order to obtain the best solution possible. We now want to give some more details about these steps:
+				
+				\begin{enumerate}
+					\item \textbf{Initialization:}
+					The algorithm is initialized by applying the operation $\bigotimes^{n+1}\mathcal{H}(\bigotimes^n I\otimes X)$ onto the state $|\underline{0}\rangle_{n+1}$. This brings the basis state in uniform superposition and the initial coefficients of the state $\ket{\psi}$ are real numbers. 
+					
+					\item \textbf{Sign Flip:}
+					To flip the sign of the target state $\ket{\underline{s}}_n \otimes \frac{1}{\sqrt{2}}(\ket{0}-\ket{1})$, we apply $\mathcal{U}_f$ to $\ket{\psi}$. In fact we can always think of the n + 1 qubit as being in the state $\frac{1}{\sqrt{2}}(\ket{0}-\ket{1})$ and \emph{unentangled} from the rest of the qubits, with the sign flip afflicting only the first n qubits. Therefore, the state we obtain by applying $\mathcal{U}_f$ to $\ket{\psi}$ is the same as $\ket{\psi}$ except that the sign of $\ket{\underline{s}}_n \otimes \frac{1}{\sqrt{2}}(\ket{0}-\ket{1})$ has been flipped.
+					
+					\item \textbf{Inversion about the average:}
+					This is the last step we need to modify the coefficients of our state in order to find the solution. This is a unitary operation that can be expressed by the following matrix:
+					\begin{equation*}
+						\centering
+						W =
+						\begin{pmatrix}
+						\frac{2}{2^n}-1 & \frac{2}{2^n} & \cdots & \frac{2}{2^n} \vspace{3pt} \\
+						\frac{2}{2^n} & \frac{2}{2^n}-1 & \cdots & \frac{2}{2^n} \\
+						\vdots & \vdots & \ddots & \vdots \\
+						\frac{2}{2^n} & \frac{2}{2^n} & \cdots & \frac{2}{2^n}-1
+						\end{pmatrix}
+						=
+						\begin{pmatrix}
+						\frac{2}{2^n} & \frac{2}{2^n} & \cdots & \frac{2}{2^n} \vspace{3pt} \\
+						\frac{2}{2^n} & \frac{2}{2^n} & \cdots & \frac{2}{2^n} \\
+						\vdots & \vdots & \ddots & \vdots \\
+						\frac{2}{2^n} & \frac{2}{2^n} & \cdots & \frac{2}{2^n}
+						\end{pmatrix}
+						- \otimes^{n}I
+					\end{equation*}
+					where the denominator $\frac{1}{2^n}$ computes the average coefficient, the numerator 2 of the fraction takes twice the average, and finally we subtract the identity to subtract each individual coefficient from twice the average. Thanks to the definition of the Hadamard gate we can show that W can be written as:
+					\begin{equation*}
+					\centering
+					W = (-\otimes^n\mathcal{H})D(\otimes^n\mathcal{H})
+					\end{equation*}
+					where D is a diagonal matrix $diag(-1,1,\cdots,1)$ of size $2^n$. This expression trivially shows that " is unitary in fact $\bigotimes^n\mathcal{H}$ is unitary and D is diagonal with ones on its diagonal. Thus we can summarize the analysis of the inversion of the average by concluding that it can be performed by applying $W = (-\bigotimes^n\mathcal{H})D(\bigotimes^n\mathcal{H})$ to the n qubits of interest.
+				\end{enumerate} 
+	
+	\newpage
 	\section{Computational Theory}
 	\label{sec:computationalTheory}
+		It is important to give a brief introduction also about computational theory, in particular to understand how we are able to compare the execution of a classical with a quantum algorithm but also to grasp why the SAT has been chosen as the reference algorithm to carry on the entire paper. In this section we want to address quickly the basic computational definitions we need to evaluate the complexity of a classical algorithm and understand how these definitions are applied in quantum algorithms. We will see that the quadratic speedup we achieved thanks to Grover's algorithm provides enhancements in a slight different computation complexity definition with respect to the one we are used to consider. \\
+		
+		In the classical computational theory we are interested in determining two major types of issues:
+		
+		\begin{enumerate}
+			\item Evaluate the \emph{complexity} of a given algorithm $A$ to solve a problem $P$
+			
+			\item Evaluate the \emph{inherent difficulty} of a given problem $P$
+		\end{enumerate}
+	
+		\subsection{Algorithm Complexity}
+		\label{sec:algorithmComplexity}
+			As we have studied, being computer scientist engineers, one of the most important things to solve a problem is to choose the best algorithm in terms of performances to solve each of the possible instances of the problem. But how do we evaluate the performances of an algorithm?
+			
+			\paragraph{Definition (Computing Time):} \emph{The computing time of an algorithm is evaluated in terms of elementary operations needed to solve a given instance $I$. In this definition we assume that all elementary operations require one unit of time.} \\
+			
+			It is clear that the number of elementary operations depends on the size of the instance $I$. The biggest the instance it is, the highest the computing time will be. The \textbf{size} of an instance can be considered as the number of bits needed to encode that specific instance. There are two features of complexity that influence the choice of an algorithm:
+			
+			\begin{itemize}
+				\item \textbf{Time Complexity:} we want to identify a function $f(n)$ such that, for every instance $I$ of size at most n the number of elementary operations to solve the instance is smaller or equal to $f(n)$.
+				
+				\item \textbf{Space Complexity:} we want to identify a function $g(n)$ such that, for every instance $I$ of size n the number of bits needed to encode it is smaller or equal to $g(n)$.
+			\end{itemize}
+			
+			In the comparison between the classical and the quantum solver for the SAT we will be mainly interested in time complexity, this is why we are going to focus on it in the next sections. However we do not have to neglect space complexity, as we saw at the beginning of the paper it is still one of the main issues in quantum computing, in particular because of its young technology; this is also why we prefer to focus on time complexity where we can see in practice the quadratic speedup that we were mentioning. \\
+			
+			As we know, the function $f(n)$ is expressed in asymptotic terms using the \emph{big-O notation}, and thanks to it we are able to make a very important distinction in classical algorithms.
+			
+			\paragraph{Definition (Polynomial Algorithm):} \emph{an algorithm is polynomial if it requires, in the worst case, a number of elementary operations $f(n)=\mathcal{O}(n^k)$ where n is the size of the instance and k a constant.}
+			
+			\paragraph{Definition (Exponential Algorithm):} \emph{an algorithm is exponential if it requires, in the worst case, a number of elementary operations $f(n)=\mathcal{O}(2^n)$ where n is the size of the instance.} \\
+			
+			We always look for polynomial algorithms to solve our problems but for some interesting case we haven't still found a better solution than an exponential algorithm. As we will see in section \ref{sec:satClassical} very efficient algorithms have been studied to reduce the complexity of the solver for the SAT problem but the best we can achieve is to decrease the base of the exponential until $\mathcal{O}(1.30704^n)$ (randomized classical algorithm). This is already an extreme enhancement decreasing almost to 1 which would lead the algorithm to be constant time; now considering the quadratic speedup we can achieve with quantum computing we can grasp once more its advantages. 
+		
+		\subsection{Inherent Difficulty}
+		\label{sec:inherentDifficulty}
+			In this section we are going to formalize the theory that studies which of the algorithms is the best to solve a specific problem. Intuitively we are looking for the complexity of the most efficient algorithm that could ever be designed for that problem.
+			
+			\paragraph{Definition (Simple Problem):} \emph{an algorithm $P$ is polynomially solvable ("easy"), if there is a polynomial-time algorithm providing an optimal solution for every of its instances.} \\
+			
+			Thus which are difficult problem? Actually we will give a more precise definition by using the $hard$ word, in fact it does not suffice to have an algorithm that solves an algorithm in exponential time to say that it is difficult. It may be that we have not still found the algorithm able to solve it in polynomial time! There are several problems that seem to be "difficult", for example: \emph{the Travelling Salesman Problem, the SAT, graphs colouring...}
+		
+		\subsection{NP-completeness Theory}
+		\label{sec:npCompleteness}
+			To continue the study of algorithms in particular with the definitions that we now know about their performances, we want to reach the definitions of the complexity classes $P$ and $NP$. With this classification we will finally be able to understand why we decided to choose the SAT as the problem to carry on this paper. To simplify the discussion we will consider the \emph{recognition version} of a problem without loosing any kind of generality.
+			
+			\paragraph{Definition (Recognition Version):} \emph{a recognition problem is a problem whose solution is either "yes" or "no".} \\
+			
+			To every optimization problem we can associate its recognition version, always considering the following assumption: any optimization problem is at least as difficult as its recognition version. This shows why concluding that a recognition problem is "difficult" implies that its original version is "difficult" too. Now that we know the definition of recognition problems we can provide the first very important definition of the complexity class in which we hope to find the algorithm that solves our problem.
+			
+			\paragraph{Definition (Complexity P-class):} \emph{$\mathcal{P}$ denotes the class of all recognition problems that can be solved in polynomial time}. \\
+			
+			An important conclusion shows that $\mathcal{P}$ can be formally defined in terms of deterministic Turing machines. This is very interesting for us, in particular recalling what we concluded at \ref{conc:qcTuring}. The other complexity class we do not hope to retrieve our algorithm is a superclass of the one we have just presented and it is defined as follows.
+			
+			\paragraph{Definition (Complexity NP-class):} \emph{$\mathcal{N}\mathcal{P}$ denotes the class of all recognition problems such that, for each instance with “yes” answer, there exists a concise proof which allows to verify in polynomial time that the answer is “yes”.} \\
+		
+			A trivial example is the 3-SAT recognition problem: given a clause we are able in polynomial time to establish whether the problem is satisfiable or not. From the definitions we have just provided it is clear that the $\mathcal{N}\mathcal{P}$ includes the $\mathcal{P}$, but nothing more can be said among these two classes. It is in fact one of the \emph{millennial problems} the one to establish whether $\mathcal{N}\mathcal{P}$ coincides with $\mathcal{P}$ or that the inclusion is strict. \\
+			
+			To understand the decision of choosing the SAT as the reference algorithm we still need some definitions. In particular we will see that thanks to the SAT we are able to classify several algorithms in the classes we have just presented. In order to do so we need a criterion that allows to classify an algorithm thanks to its intrinsic difficulty, identifying the most difficult ones in $\mathcal{N}\mathcal{P}$.
+			
+			\paragraph{Definition (Polynomial Time Reduction):} \emph{Let $\mathcal{P}_1, \mathcal{P}_2 \in \mathcal{N}\mathcal{P}$, then $\mathcal{P}_1$ reduces in polynomial time to $\mathcal{P}_2$ ($\mathcal{P}_1 \propto \mathcal{P}_2$) if there exists an algorithm to solve $\mathcal{P}_1$ which:}
+			\begin{enumerate}[label=(\roman*)]
+				\item \emph{uses (once or several times) a hypothetical algorithm for $\mathcal{P}_2$ as a subroutine}
+				
+				\item \emph{the algorithm for $\mathcal{P}_1$ runs in polynomial time if we assume that the algorithm for $\mathcal{P}_2$ runs in constant time}
+			\end{enumerate}
+		
+			Thanks to this first definition we can draw a first conclusion that allows us to classify an algorithm in the $\mathcal{P}$ class: \emph{if $\mathcal{P}_1\propto\mathcal{P}_2$ and $\mathcal{P}_2$ admits a polynomial-time algorithm, then also $\mathcal{P}_1$ can be solved in polynomial time. In formulas:}
+			
+			\begin{equation*}
+				\centering
+				(\mathcal{P}_1\propto\mathcal{P}_2) \land (\mathcal{P}_2 \in \mathcal{P}) \implies \mathcal{P}_1 \in \mathcal{P}
+			\end{equation*}
+		
+			Now that we know how to classify polynomial time algorithms we need a similar criterion also for the problems that belong to the $\mathcal{N}\mathcal{P}$ class. The discussion is now more delicate, in particular we need another definition in order to identify a very special subclass containing the most relevant difficult problems contained in $\mathcal{N}\mathcal{P}$.
+			
+			\paragraph{Definition ($\mathcal{N}\mathcal{P}$-complete Problems):} \emph{a problem $P$ is $\mathcal{N}\mathcal{P}$-complete if and only if:}
+			\begin{enumerate}[label=(\roman*)]
+				\item $\mathcal{P}$ belongs to $\mathcal{N}\mathcal{P}$
+				
+				\item every other problem $P^{'}\in\mathcal{N}\mathcal{P}$ can be reduced to $P$ in polynomial time ($P^{'}\propto P$)
+			\end{enumerate}
+			 
+			 This definition has a very important consequence related to the millennial problem we defined before. If there existed any polynomial-time algorithm for any $\mathcal{N}\mathcal{P}$-complete problem, then all problems in $\mathcal{N}\mathcal{P}$ can be solved in polynomial time. Thus we would have demonstrated that: $\mathcal{P}=\mathcal{N}\mathcal{P}$. Many studies show that the equality is very unlikely, thus it is conceived that the relation between the two classes is a strict inclusion. However, this allows us to say that $\mathcal{N}\mathcal{P}$-completeness provides a strong evidence that a problem is \emph{inherently difficult}. Now, to show that $P_2\in\mathcal{N}\mathcal{P}$ is $\mathcal{N}\mathcal{P}$-complete it suffices to show that an $\mathcal{N}\mathcal{P}$-complete problem $P_1$ reduces in polynomial time to $P_2$. More formally:
+			 \begin{equation*}
+			 	\centering
+			 	P\propto P_1, \forall P\in\mathcal{N}\mathcal{P} \land P_1 \propto P_2 \overset{transitivity}{\implies} P\propto P_2, \forall P\in \mathcal{N}\mathcal{P}
+			 \end{equation*}
+			 
+			 But does there exist an $\mathcal{N}\mathcal{P}$-complete algorithm that allows us to exploit this implication? The answer was provided by Stephen Arthur Cook in 1971 when he proved that the SAT is $\mathcal{N}\mathcal{P}$-complete (\cite{CookSAT}). This conclusion has brought enormous advantages to the complexity theory, an example are the 21 discrete optimization problems shown to be $\mathcal{N}\mathcal{P}$-complete by Richard Karp in 1974. To conclude this section thanks to the definition of $\mathcal{N}\mathcal{P}$-complete problems we can give a further classification.
+			 
+			 \paragraph{Definition ($\mathcal{N}\mathcal{P}$-Hard Problem):} \emph{a problem is $\mathcal{N}\mathcal{P}$-Hard if every problem in $\mathcal{N}\mathcal{P}$ can be reduced to it in polynomial time (even if it does not belong to $\mathcal{N}\mathcal{P}$).} \\
+			 
+			 This last definition allows us to formulate a very important observation that relates ones more a problem with its recognition version: all optimization problems with an $\mathcal{N}\mathcal{P}$-complete recognition version are $\mathcal{N}\mathcal{P}$-Hard.
+			 
+			 It should be now clear why we decided to choose the SAT as the example to carry on the entire comparison between how its classical solver performs with respect to its quantum counterpart. The conceptual part of this paper is now arrived to its epilogue; we are now ready to start the real comparison. The next two subsections are used to introduce first the formal definition of the SAT problem and then to understand how quantum algorithms impact onto the $\mathcal{N}\mathcal{P}$ class.
 		
 		\subsection{SAT Problem}
 		\label{sec:sat}
+			Let $X\equiv\{x_1, x_2, \cdots, x_n\}$ be a set. Then $x_k$ and its negations $\overline{x}_k\;(k=1, 2, \cdots, n)$ are called literals and the set of all such literals is denoted by $X^{'}=\{x_1,\overline{x}_1,\cdots, x_n, \overline{x}_n\}$. The set of all subsets of $X^{'}$ is denoted by $\mathcal{F}(X^{'})$ and an element $C\in\mathcal{F}(X^{'})$ is called a clause. We consider a truth assignment to all variables $x_k$. If we can assign the truth value to at least one element of $C$, then $C$ is called satisfiable. When $C$ is satisfiable, the truth value $t(C)$ of $C$ is regarded as true, otherwise, that of $C$ is false. Take the truth values as true "1" while false "0". Then 
+			\begin{equation*}
+				\centering
+				C\;is\;satisfiable\iff t(C)=1
+			\end{equation*}
+			Let $L=\{0,1\}$ be a Boolean lattice with usual join $\lor$ and meet $\land$, and $t(x)$ be the truth value of a literal $x$ in $X$. Then the truth value of a clause $C$ is written as
+			\begin{equation*}
+				\centering
+				t(C) = \lor_{x\in C}t(x) 
+			\end{equation*}
+			Further  a set $\mathcal{C}$ of all clauses $C_j\;(j = 1, 2, \cdots, m)$ is called \emph{satisfiable} if and only if the meet of all truth values of $C_j$ is 1:
+			\begin{equation*}
+				\centering
+				t(\mathcal{C}) = \land_{j = 1}^{m}t(C_j) = 1 
+			\end{equation*}
+			
+			Finally the formal definition of the most general formulation of the SAT problem is written as follows.
+			
+			\paragraph{Definition (SAT Problem):} \emph{given a set $X\equiv \{x_1,x_2,\cdots,x_n\}$ and a set $\mathcal{C}={C_1,C_2,\cdots,C_m}$ of clauses, determine whether $\mathcal{C}$ is satisfiable or not.} \\
+			
+			Hence it is the problem to determine whether it exists a truth assignment to make $\mathcal{C}$ satisfiable. As we have already mentioned the satisfiability problem can also be described as the problem of asking if there exists an assignment to the literals of its clauses that allows to make the \emph{Conjunctive Normal Form} to have value 1. The CNF also called \emph{Product of Sums} (POS) is obtained by the conjunction of the clauses written as the disjunction of their literals. \\
+			
+			Now that we now the know the formal definition of the SAT it is important to understand some of its specific formulations, in particular the ones that we considered during this study and that I decided to implement for the comparison. As it is reported in almost every paper, the SAT is in fact denoted as k-SAT. The k indicates the number of variables of the SAT instance that is considered (n in the definition above); if we look at the example \ref{ex:c6} we have a 3-SAT problem with 2 clauses. The precise definition of the implementations of the SAT that we considered are presented in the last section (\ref{sec:satImpl}), here it is the list of all its formulations and some important features of each in particular with respect their complexity:
+			
+			\begin{itemize}
+				\item At first it is important to understand that the exponential growth of the instance in modern solvers for an SAT instance is caused by the number of variables chosen. Thus the highest the k will be the more time will be required by our solver to solve the problem. The number of clauses instead do not influence the time complexity while we will need more space to encode every additional clause; but let's focus always on time complexity
+				
+				\item The recognition version of every k-SAT instance can be solved in polynomial time. Thus we are able to design an algorithm that is able to answer "yes" when a given clause makes the formulation satisfiable or "no" otherwise, in polynomial time.
+				
+				\item It has been proved that the general versions of th 1-SAT and the 2-SAT versions can be solved in polynomial time. The solvers we implemented are generalized to the case of k clauses as we could compare also the polynomial time solutions; we will see that while in this case the enhancement provided by the quantum version is not that significant we perceive problems for the exponential growth of the size of the instance of the quantum device!
+				
+				\item The 3-SAT version is the simplest and significant case from which we can start the comparison. As we can see in the literature it is the most studied case and all the efficient solvers that have been implemented consider it as reference. It would be in fact sufficient to find an algorithm that solves it in polynomial time and generalize it for its further formulations.
+				
+				\item The most general quantum solver of an SAT formulation combines classical efficient algorithms with Grover's search and qiskit version is already the best. We considered it to make the general comparison between k-SAT problems while we studied a simplified version to see in action the specific quantum steps of Grover's algorithm.
+				
+				\item The exactly-1-3-SAT problem is formalized as follows: \\
+				
+				\hspace{0.3cm} \textbf{INPUT:} SAT formula in conjunctive normal form $\land_{j = 1}^{m}C_j$ over n Boolean variables $x_1,x_2,\cdots,x_n$ with 3 literals per clause $C_1,C_2,\cdots,C_m$ \\
+				
+				\hspace{0.3cm} \textbf{OUTPUT:} Does there exist an assignment $x_1,x_2,\cdots,x_n$ such that every clause $C_1,C_2,\cdots,C_m$ has exactly one \emph{true} literal?
+				
+				The exactly-1-3-SAT has been proved to be an $\mathcal{N}\mathcal{P}$-Hard problem.
+			\end{itemize}
+			
+		\subsection{Can we solve NP-hard problems?}
+		\label{sec:npHardProblems}
+			In \cite[G.Nannicini, 2020]{introNoPh} is highlighted an important remark that we have now to consider, finally competing with both the quantum computing world and the computational complexity theory. The answer to this section can be included in the important conclusions we are highlighting in this paper, in fact we can formulate it as follows.
+			
+			\paragraph{Conclusion 6:} \emph{even if we can easily create a uniform superposition of all basis states, the rules of measurement imply that using just this easily-obtained superposition does not allow us satisfactorily solve $\mathcal{N}\mathcal{P}$-complete problems, such as, for example, SAT.} \\
+			
+			As we explained in Grover's algorithm to solve the SAT problem (section \ref{sec:grover}), considering a circuit of $q = n + 1$ qubits and performing the measurement of this state will return a binary string that satisfies the SAT formula if and only if the last qubit has value 1 after the measurement. This happens with a probability that depends on the number of binary assignments that satisfy the formula. If the SAT problem at hand is solved by exactly $\epsilon$ assignments out of $2^n$ possible assignments, then the probability of finding the solution after one measurement is $\frac{\epsilon}{2^n}$: we have just randomly sampled a binary string hoping that it satisfies the SAT formula. Clearly, this is not a good algorithm. In fact, we can from this draw another important conclusion to be considered with respect to the complexity classes that we identified.
+			
+			\paragraph{Conclusion 7:} \emph{in general solving $\mathcal{N}\mathcal{P}$-Hard problems in polynomial time with quantum computers is not believed to be possible.} \\
+			
+			The literature shows that the BQP class, the class of problems solvable in polynomial time by a quantum computer with bounded error probability, does not contain the class $\mathcal{N}\mathcal{P}$. Of course the proof is not available yet, because showing that $\mathcal{N}\mathcal{P}\nsubseteq BQP$ would resolve the millennial problem \textbf{P vs NP}. Even if we cannot solve all "difficult" problems in polynomial time using a quantum computer, we will see with the implementation of our SAT solver a significant speedup from every other classical implementation. The basic principle, as we already anticipated while describing Grover's algorithm, is to start with a uniform superposition of basis states, then apply operations that make the basis states interact with each other so that the modulus of the coefficients for some basis states increase, which implies that the other coefficients decrease. Performing a measurement will then reveal the solution to the problem at hand, or some useful information about the solution, with high probability. As we will see in the results of our generalized implementation the result is very noisy but still significant as we have verified that for several runs it still provides with the highest probability always the same satisfiable formula.
 		
 	\section{SAT Implementation}
 	\label{sec:satImpl}
+	
+		\paragraph{Conclusion n:} \label{conc:queryCompl}
 		
 		\subsection{Classical}
 		\label{sec:satClassical}
@@ -561,6 +775,9 @@ vector space $V \otimes W$ has basis $e_i \otimes f_j \forall i = 1,...,m, j = 1
 	\begin{appendices}
 		\section{Qiskit}
 		\label{sec:qiskit}
+			% qui dire cosa è qiskit in generale e fare riferimento a come implementa il sat, usare il jupyter notebook come riferimento
+			
+			% magari dire che sono contributor e mettere lo screen del commit nella presentazione
 		
 		\section{Code with Qiskit}
 		This section contains the list of the snippets of code needed to represent the examples used in the paper. To replicate them consider ti import the following libraries:
