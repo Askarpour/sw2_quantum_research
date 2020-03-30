@@ -756,6 +756,7 @@ vector space $V \otimes W$ has basis $e_i \otimes f_j \forall i = 1,...,m, j = 1
 		
 	\section{SAT Implementation}
 	\label{sec:satImpl}
+		
 	
 		\paragraph{Conclusion n:} \label{conc:queryCompl}
 		
@@ -775,12 +776,14 @@ vector space $V \otimes W$ has basis $e_i \otimes f_j \forall i = 1,...,m, j = 1
 	\begin{appendices}
 		\section{Qiskit}
 		\label{sec:qiskit}
-			% qui dire cosa è qiskit in generale e fare riferimento a come implementa il sat, usare il jupyter notebook come riferimento
+			Qiskit is an open-source quantum computing software development framework for leveraging today's quantum processors. In the literature we find several different frameworks that allow to work with quantum computers, characterized by different implementation languages but from the quantum algorithm designer point of view, with different interfaces to the quantum computers and different simulators. In this paper I decided to use qiskit because it is the most spread one, with a very good documentation and a wide community that updates every day the issues. Moreover, being realized by IBM it provides an experience called \emph{IBM quantum experience}(IBMQ) which allows to run the algorithms directly on a real quantum computer rather than on a simulator. Qiskit is realized in python and this may suffice to explain why it has been chosen among the other solutions$\cdots$\\
 			
-			% magari dire che sono contributor e mettere lo screen del commit nella presentazione
+			Thanks to its textbook \cite{qiskitTextbook} it provides a very wide and complete description on how to approach the area of quantum computing. Starting from the introductory subjects needed to face the basic principles of quantum physics it increasingly introduces how the library realizes the quantum operations that a user can define to implement its algorithms. Several examples are provided with jupyter notebooks where each step can be analysed in detail understanding how and what each instruction from the library does. I completely went through the entire notebook for my first approach to quantum computing and there I found the example I was looking for to produce this paper which is meant to simplify even more the introduction to this area, using a concrete example decomposed in different steps each introducing a particular aspect of how to use the library. Thanks to this notebook I realised the notebook visible in the repository at \textsc{Code/Quantum/quantumSat.ipynb} where I replicated the solution of the SAT problem by using the grover solver implemented in the library. Thanks to the quantumSat.ipynb notebook I understood how difficult it is to realize the real implementation of a solver, interfacing directly with the quantum device, this helped me a lot to find a good way to realize an implementation of the same algorithm in a simpler case to solve the SAT problem. All the notes and some additional examples I realized during this first approach are present in the notebook. \\
+			
+			In conclusion it is very important to remark that qiskit is an open source software where a great community is very available to help whoever wants to start studying quantum computing. Very interesting videos were also realized to give a further way to approach the library, thanks to them I learnt how to become a contributor of an open-source project and I became a contributor by solving an issue that can be visible at the following url: \url{https://github.com/Qiskit/qiskit-terra/pull/3751}.
 		
 		\section{Code with Qiskit}
-		This section contains the list of the snippets of code needed to represent the examples used in the paper. To replicate them consider ti import the following libraries:
+		This section contains the list of the snippets of code needed to represent the examples used in the paper. To replicate them consider to import the following libraries:
 		\lstinputlisting[language=python]{code/imports.py}
 		
 		\label{sec:codeWithQiskit}
