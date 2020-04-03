@@ -38,6 +38,7 @@
 	% esempi
 	% riferimenti al codice nell appendice
 	% important conclusions
+	% dire bene che tutta la prima parte è lo state of the art e poi come ho deciso di affrontarlo e che alla fine cè tutto quello che ho fatto io
 	
 	\section*{Introduction}
 	\label{sec:introduction}
@@ -756,15 +757,73 @@ vector space $V \otimes W$ has basis $e_i \otimes f_j \forall i = 1,...,m, j = 1
 		
 	\section{SAT Implementation}
 	\label{sec:satImpl}
-		
+		We have finally reached the heart of this paper. Having now all the necessary fundamental concepts of quantum computing and of the problem we want to study, it is possible to put everything together and make the comparison we have been talking until now. To understand how to compare a classical algorithm with its respective quantum counterpart we will need one last definition and some further considerations on the complexities that are now achieved by the most efficient classical algorithms for the problem of solving the SAT. In this section we will start in the classical (\ref{sec:satClassical}) part to describe these complexities by showing in the end the characteristics of the algorithm we decided to use in order to realize the comparison. Then in the quantum part (\ref{sec:satQuantum}) in the same way we describe how the complexities are enhanced thanks to the implementation we realized using Grover's search and then which are the elements of the algorithm we realized for the comparison. In the end, thanks to all the information obtained from the two implementations we will draw the comparison. \\
 	
-		\paragraph{Conclusion n:} \label{conc:queryCompl}
+		As we mentioned, before going deep inside the implementation of the algorithms we need to define a concept that may result confusing for what we have said until now about computational complexity. However, we needed what studied in section \ref{sec:computationalTheory} to identify the main issues of complexity in both a classical and quantum world, but to conclude our work and realize a comparison between the SAT solvers we need to consider another type of complexity in particular related to all those algorithms that belong to the family of \textbf{searching}. As we already said, thanks to Grover's algorithm we are able to perform a search of our solution to the SAT problem by exploiting quantum physics features and to compare the quadratic speedup obtained we need to consider the following very important conclusion.
+		
+		\paragraph{Conclusion 8:} \label{conc:queryCompl} \emph{the complexity of an algorithm that belongs to the search class is determined only in terms of the number of the calls to the function f. This model is known as query complexity, because it defines the complexity of an algorithm as the number of queries to a given function (in this case, f). Query complexity is used as a model to answer important theoretical questions. There are many quantum algorithms that yield speedups under the query complexity model, but some others, e.g., Shor's algorithm, are faster than (known)
+		classical algorithms under the more traditional computational complexity model, i.e., number of
+		basic operations.}
+	
+		\subsection{SAT Instances}
+		\label{sec:satInstances}
+			% here to list all the instances used to do the comparison
 		
 		\subsection{Classical}
 		\label{sec:satClassical}
-		
+			The SAT problem, thanks to the importance it provided in the field of computational complexity when Cooks demonstrated its belonging to the $\mathcal{N}\mathcal{P}$-complete class, became the subject of several research studies. The researches followed all the same objective, that is the one of obtaining a polynomial solver for any instance of the SAT problem in order to prove the millennial problem of P vs NP. However nowadays we are not still able to find such an algorithm and thus a solution to the famous problem. \\
+			
+			Every year it is held a competition where the most competent computer scientists in the world compete in order to implement the best SAT solver in terms of computational complexity. Thanks to this event and to the huge research behind this problem, starting from deterministic algorithms forward to nondeterministic ones surprising results were obtained. The exciting part of these exponential time algorithms is their ability to reduce always more the basis of the general starting point of every search algorithm: $2^n$. As we see in the following list for the 3-SAT problem of deterministic and nondeterministic algorithms different approaches allow to reduce the 2 until the best result reached so far of: $\mathcal{O}(1.30704^n)$.
+			
+			\begin{itemize}
+				\item	\cite[Kutzkov K., Scheder D.]{KutzkovScheder} $\mathcal{O}(1.439^n)$ \textbf{[Deterministic]}
+				
+				\item	\cite[Makino K., Tamaki S., Yamamoto M]{MakinoTamakiYamamoto} $\mathcal{O}(1.3303^n)$ \textbf{[Derandomized]}
+				
+				\item	\cite[Iwama K., Seto K., Takai T., Tamaki S.]{IwamaSetoTakai} $\mathcal{O}(1.32113^n)$ \textbf{[Randomized]}
+				
+				\item	\cite[Hertli T., Moser R. A., Scheder D.]{HertliMoserScheder} $\mathcal{O}(1.32065^n)$ \textbf{[Randomized]}
+				
+				\item	\cite[Hertli T.]{Hertli} $\mathcal{O}(1.30704^n)$ \textbf{[Randomized]}
+			\end{itemize}
+			
+			\subsubsection{Solver}
+			\label{sec:classicalSolver}
+				We can now introduce the version of the solver considered to make the comparison between the classical and the quantum implementations. The aim was to find the best solver for the comparison, but in order to realize one as efficient as the those listed above would have required mathematical skills not relevant for our study. Hence I decided to start with a solver that is based on \emph{Knuth} SAT0 (\url{https://www-cs-faculty.stanford.edu/~knuth/programs/sat0.w}) solution in order to have a first comparison to test some particular instances of the k-SAT problem (with k ranging from 2 to 4). The solver implementation is available at \url{https://github.com/sahands/simple-sat}, even if based on the first of Knuth's SAT-solvers series it exploits some particular features that allow to handle in the best way the algorithm resolution over a general k-SAT formulation. \\
+				
+				The algorithm is a watch-list based backtracking algorithm based on the following features that allow to obtain an efficient version in terms of both time and space complexities:
+				
+				\begin{enumerate}[label=(\roman*)]
+					\item To encode the formulation of a general k-SAT instance we need to represent it with the meaning of a CNF. Thus a set of clauses each containing variables, negated or not, in conjunction. To do so we may think to realize a list of all the clauses, but this does not help when in the algorithm we want to look for the variables in order to find a satisfying formula. Instead, unique number is assigned to each variable once it is encountered, starting from 0 and counting up, using a dictionary to keep track of the mapping. Then the positive variables encoded as number $x$ will be stored at position $2x$ and the negated one will be present at $2x+1$.
+					
+					\item It is a backtracking algorithm in which we try to assign true or false values to all variables, starting from the one at position 0 up to the last $n - 1$ one. The entire search space is of size $2^n$ but by pruning, only the best branches of the search tree will be explored.
+					
+					\item Watch-lists allow to manage easily the backtracking mechanism. For each clause to be satisfied we need in fact one literal to be satisfied. As such, we can make each clause watch one of its literals, and ensure that the following \textbf{invariant} is maintained throughout the algorithm: \emph{All watched literals are either not assigned yet, or they have been assigned true}. Then we proceed assigning true or false values to variables, starting from 0 up to $n-1$. If we successfully assign true or false to every variable while maintaining the above variant, then we have an assignment that satisfies every clause.
+					
+					\item Every time we assign a value to a variable we have to ensure that the watch-list is updated accordingly. To do so efficiently, we need to keep a list of clauses that are currently watching a given literal. This is done thanks a double-ended queue which provides the best performances.
+					
+					\item During a backtracking step, assignments only go from 0 or 1 to None, the watch-list does not to be updated at all to maintain the invariant. This is why the watch-list is the best approach and it means that the backtracking step will simply be changing the assignment of a variable back to None.
+					
+					\item Both recursive and iterative versions are present, we used the iterative one for out tests mainly for what Knuth says about his dislike to recursion. The SAT0 is in fact implemented in an iterative way.
+				\end{enumerate}
+			
+			\subsubsection{Significant Results}
+			\label{sec:classicResults}
+				
 		\subsection{Quantum}
 		\label{sec:satQuantum}
+		
+			\subsubsection{Qiskit's Solver}
+			\label{sec:quantumQiskitSolver}
+		
+			\subsubsection{Decision Version}
+			\label{sec:quantumDecisionVersion}
+			
+			\subsubsection{Exactly 1 k-SAT}
+			\label{sec:quantumExatclyOne}
+			
+			\subsubsection{Significant Results}
+			\label{sec:quantumResults}
 		
 		\subsection{Classical vs. Quantum}
 		\label{sec:satCsatQ}
