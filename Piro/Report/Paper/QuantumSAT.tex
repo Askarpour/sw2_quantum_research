@@ -530,7 +530,7 @@ vector space $V \otimes W$ has basis $e_i \otimes f_j \forall i = 1,...,m, j = 1
 			
 			To conclude with this part and start to study our first relevant quantum algorithm, we still have to conclude two more important features related properly to quantum algorithms. We have seen that measuring a quantum state makes it collapse so that it can not be reused. It seems natural hence to look for a way to copy a quantum state, for example to continue with another computation. However, in particular because of the property of quantum gates to be unitary matrices it turns out that cloning a quantum state is not possible. This yields to another important conclusion that we have always to keep in mind while defining quantum algorithms.
 			
-			\paragraph{Conclusion 4:} \emph{It is impossible to clone quantum states}.\\
+			\paragraph{Conclusion 4:} \label{conc:noCloning} \emph{It is impossible to clone quantum states}.\\
 			
 			Hence, whenever we run a circuit that produces an output quantum state, in general we can reproduce the output quantum state only by repeating all the steps of the algorithm.
 			Another important aspect concerns the initialization of the quantum computer before starting to compute the algorithm. As we mentioned when we defined the Hadamard gate, by applying multiple Hadamards on the entire quantum state of the quantum computer we set the state to a uniform superposition. It is here that we can feel another time the extreme power of quantum computing with respect its classical counterpart.
@@ -771,7 +771,7 @@ vector space $V \otimes W$ has basis $e_i \otimes f_j \forall i = 1,...,m, j = 1
 		
 		\subsection{Classical}
 		\label{sec:satClassical}
-			The SAT problem, thanks to the importance it provided in the field of computational complexity when Cooks demonstrated its belonging to the $\mathcal{N}\mathcal{P}$-complete class, became the subject of several research studies. The researches followed all the same objective, that is the one of obtaining a polynomial solver for any instance of the SAT problem in order to prove the millennial problem of P vs NP. However nowadays we are not still able to find such an algorithm and thus a solution to the famous problem. \\
+			The SAT problem, thanks to the importance it provided to the field of computational complexity when Cooks demonstrated its belonging to the $\mathcal{N}\mathcal{P}$-complete class, became the subject of several research studies. The researches followed all the same objective, that is the one of obtaining a polynomial solver for any instance of the SAT problem in order to prove the millennial problem of P vs NP. However nowadays we are not still able to find such an algorithm and thus a solution to the famous problem. \\
 			
 			Every year it is held a competition where the most competent computer scientists in the world compete in order to implement the best SAT solver in terms of computational complexity. Thanks to this event and to the huge research behind this problem, starting from deterministic algorithms forward to nondeterministic ones surprising results were obtained. The exciting part of these exponential time algorithms is their ability to reduce always more the basis of the general starting point of every search algorithm: $2^n$. As we see in the following list for the 3-SAT problem of deterministic and nondeterministic algorithms different approaches allow to reduce the 2 until the best result reached so far of: $\mathcal{O}(1.30704^n)$.
 			
@@ -812,12 +812,69 @@ vector space $V \otimes W$ has basis $e_i \otimes f_j \forall i = 1,...,m, j = 1
 				
 		\subsection{Quantum}
 		\label{sec:satQuantum}
+			In this section we finally provide the description of the solvers we considered to realize the comparison. In order to face the implementation of a solver for the SAT problem we go through three different approaches that allow to understand how the final algorithm has been implemented. First with a jupyter notebook it is possible to understand the comparison from the most general formulation of the problem, thus a k-SAT instance. In the notebook we used qiskit's implementations to solve a big instance of the problem in order to see how it performed in a very complicate example. The decision version implementation instead is used to make some practice, in particular for the problem of realizing manually multiple qubit gates that the library does not support. In the end the exactly 1 k-SAT solver is the most general implementation we were able to realize, generalizing the example provided by \cite[Nannicini G.]{introNoPh}. The following subsections describe precisely how these programs work.
 		
 			\subsubsection{Qiskit's Solver}
 			\label{sec:quantumQiskitSolver}
+				In the jupyter notebook provided in the repository at \textsc{Code/Quantum} we can find the complete description of how qiskit is used in order to solve an instance of a 4-SAT problem composed of 6 clauses. This complex example has been used to check if the algorithm realized by qiskit was able to solve in an efficient way problems with more than 3 variables. It has been the first approach to the implementation and it has helped us to conclude the following considerations that we used to realize the solvers presented in the following sections. \\
+				
+				Thanks to the open source code we were able to study how the grover class is implemented in qiskit. It is important to remark that ideally the code provided is able to solve every instance of a k-SAT with m clauses. What we were interested to understand from this implementation was first how to achieve such a general algorithm in order to use it for our comparison and second how many iterations of grover's step were used in order to find a solution; as we saw in the description of grover's algorithm, in fact, it is very important to choose the correct number of cycles not to compromise the result of the algorithm. Hence we understood that:
+				\begin{itemize}
+					\item Qiskit's grover solver is based on \cite[Boyer M., Brassard G., Hoyer P. and Tapp A.]{qiskitGrover} where it is explained that a good number to achieve almost the certainty of finding a solution, if there were only one, is $\frac{\pi}{4}\sqrt{N}$ (where N is the number of the variables). This led us to understand that typically one only iteration suffices to find the optimal result of the problem, and that increasing the number N we will need to do more iterations.
+					
+					\item Grover class is not the only one needed to solve the general k-SAT problem, several components are correlated in order to exploit also an optimal counting of the solution by using techniques achieved with some of the Shor's basic components. The high coupling of classes shows that it requires a more complete knowledge than the one described so far to define a solver as complete as the one of the library. This led us first to start with the very simple decision version implementation and then the exactly 1 k-SAT solver, not that fare from the most general version but still very noisy in the solutions.
+				\end{itemize}
+				However to conclude with this first approach to the SAT solver it can be interesting to include the histogram for the results of the instance described in the notebook and draw some considerations on the actual possibility to run this algorithm on a real quantum computer. To obtain significant results it is important at least to consider the transpiled version of the circuit that realizes the implementation of the solver to understand if it can be considered in reality or the results are just theoretical. The first notebook considered a very complex example where 10 clauses were considered to define the 4-SAT problem and theoretically we reached 5 clauses that satisfied the CNF. However the other possibilities were still very noisy and it was difficult to distinguish which were the correct results so that we needed to check the correct solutions with the classical solver that we described before. In addition the transpiled version could not be realized because the actual technology supported by the IBMQ experience allows to build at most 16 qubits circuits. Hence we reduced the number of clauses to 6 and we obtained the following two important results:
+				\begin{enumerate}
+					\item Three solutions are found in the 6 clauses formulation of the 4-SAT problem and we can clearly distinguish them thanks to the high probability associated to the coefficients related to each of the satisfying formulae found by the algorithm (check in the notebook the complete description of the solutions).
+					\begin{figure}[h] % todo resize di questa figura quando tutte le sezioni sono piene
+						\centering
+						\includegraphics[scale=0.3]{NotebookHistogram}
+						\caption{4-SAT solutions from the jupyter notebook}
+					\end{figure}
+				
+					\item From the transpiled version we were able to retrieve that:
+					\begin{verbatim}
+					gates = OrderedDict([('cx', 523), 
+					                     ('u3', 184), 
+					                     ('u1', 102), 
+					                     ('u2', 50), 
+					                     ('measure', 4), 
+					                     ('barrier', 2)])
+					depth = 481
+					\end{verbatim}
+					The results make evidence of the fact that is not possible to realize physically a quantum device with 523 CNOT gates, 184 $U_3$ gates... The number of gates in fact is far above the limits regarding decoherence time of the current near-term quantum computer. This is another challenge that we managed in our implementation where we achieved an implementable circuit thanks to a simplified version of the problem.
+				\end{enumerate} 
 		
 			\subsubsection{Decision Version}
 			\label{sec:quantumDecisionVersion}
+				This implementation was the first independent code I implemented in order to begin working seriously with qiskit. Thus I started to realize this program as a toy example thanks to the study provided in \cite[Ohya M. and Masuda N.]{quantumNP} and it turned out to be very important conclusion we later considered in the exactly 1 implementation. \\
+				
+				The paper cited above shows the quadratic speedup obtained by the quantum version of the implementation of the \emph{decision version} for the SAT. The decision version of the SAT is the problem of determining whether a given formulation can be satisfied or not, without providing the formulae that make the instance satisfiable. The circuit realized by the code is nothing more than a quantum version of the CNF for the circuit. Thanks to the correspondence between the basic operations of the quantum device and the ones of a classical one (described in section \ref{sec:operationsOnQubits}) we realized the disjunction of the literals composing the clauses in the end conjuncted all together. Thus with one measurement only on the last qubit on which the result of the formula is stored we are able to determine whether the instance of the SAT provided is satisfiable or not. The algorithm can be implemented for a general instance of every k-SAT problem, but as we can see from the following example it suffices a formulation of a 3-SAT with 4 clauses to obtain an exponential growth in the number of the qubits needed to find a solution. This is due both to the number of variables and to the number of clauses, in fact:
+				\begin{enumerate}
+					\item The number of variables increases the OR operations to realize the disjunctive form of each clause. Each OR requires 3 qubits to be realized and an additional one to make the disjunction with the previous result.
+					
+					\item In the same way the number of clauses increases the AND operations to realize the conjunction of all the final disjunctive clauses.
+				\end{enumerate}
+				Considering the following formulation of a 3-SAT with 4 clauses:
+				\begin{center}
+					$C_1 = \{x_1\}$ \\
+					$C_2 = \{x_2, x_3\}$ \\
+					$C_3 = \{x_1, \neg x_3\}$ \\
+					$C_4 = \{\neg x_1, \neg x_2, x_3\}$
+				\end{center}
+				Corresponding to the Conjunctive Normal Form:
+				\begin{equation*}
+				\centering
+				CNF = (x_1)\land(x_2\lor x_3)\land(x_1\lor \neg x_3)\land(\neg x_1\lor \neg x_2\lor x_3)
+				\end{equation*}
+				Resulted in the very very big circuit that follows which needed several ancillary qubits in order to realize all the AND and OR operations identified.
+				\begin{figure}[h]
+					\centering
+					\includegraphics[scale=0.27]{DecisionCircuit}
+					\caption{Decision version circuit}
+				\end{figure}
+				Thanks to the observation for the exponential grow-up of the ancillary qubits needed to realize multiple gates in a circuit we understood that it was necessary to find a way to reuse the qubits. Considering the important no-cloning principle described in section \ref{conc:noCloning} we will se in the next section how we were able to realize a solver that uses less 10 qubits in order to solve the exactly 1 problem for a 3-SAT problem.
 			
 			\subsubsection{Exactly 1 k-SAT}
 			\label{sec:quantumExatclyOne}
