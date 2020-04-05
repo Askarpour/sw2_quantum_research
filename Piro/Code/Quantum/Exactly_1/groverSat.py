@@ -12,12 +12,12 @@ from qiskit import *
 
 
 class GroverSAT(object):
-    def __init__(self, n, exactly_1_3_sat_formula):
+    def __init__(self, n, exactly_1_k_sat_formula):
         self.n = n
-        self.exactly_1_3_sat_formula = exactly_1_3_sat_formula
+        self.exactly_1_k_sat_formula = exactly_1_k_sat_formula
         self.f_in = QuantumRegister(n)
         self.f_out = QuantumRegister(1)
-        self.aux = QuantumRegister(len(exactly_1_3_sat_formula) + (max(n, len(exactly_1_3_sat_formula)) - 2))
+        self.aux = QuantumRegister(len(exactly_1_k_sat_formula) + (max(n, len(exactly_1_k_sat_formula)) - 2))
         self.ans = ClassicalRegister(n)
         self.circuit = QuantumCircuit(self.f_in, self.f_out, self.aux, self.ans, name='grover')
 
@@ -33,7 +33,7 @@ class GroverSAT(object):
         For each clause we construct a circuit that bit flips the corresponding auxiliary
         qubit if and only if the clause has exactly one true literal
         """
-        num_clauses = len(self.exactly_1_3_sat_formula)
+        num_clauses = len(self.exactly_1_k_sat_formula)
         self.__build_clauses(num_clauses)
 
         # the formula is satisfied if and only if all auxiliary qubits except the ancillas for the multiple CCNOT
@@ -65,7 +65,7 @@ class GroverSAT(object):
         self.__build_clauses(num_clauses)
 
     def __build_clauses(self, num_clauses):
-        for (k, clause) in enumerate(self.exactly_1_3_sat_formula):
+        for (k, clause) in enumerate(self.exactly_1_k_sat_formula):
             i = 0
             target = 0
             count = 0
@@ -118,7 +118,7 @@ class GroverSAT(object):
         """This method realizes a C^n-1 Z gate"""
         i = 0
         temp_target = 0
-        num_clauses = len(self.exactly_1_3_sat_formula)
+        num_clauses = len(self.exactly_1_k_sat_formula)
         final_target = self.f_in[self.n - 1]
         self.circuit.h(final_target)
 
