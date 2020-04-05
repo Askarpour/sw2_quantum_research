@@ -22,6 +22,9 @@
 \newcommand{\zeroket}{\begin{pmatrix} 1 \\ 0 \end{pmatrix}}
 \newcommand{\oneket}{\begin{pmatrix} 0 \\ 1 \end{pmatrix}}
 
+% settings
+\lstset{language=Python}
+\lstset{basicstyle=\footnotesize}
 \graphicspath{{img/}}
 
 \begin{document}
@@ -535,7 +538,7 @@ vector space $V \otimes W$ has basis $e_i \otimes f_j \forall i = 1,...,m, j = 1
 			Hence, whenever we run a circuit that produces an output quantum state, in general we can reproduce the output quantum state only by repeating all the steps of the algorithm.
 			Another important aspect concerns the initialization of the quantum computer before starting to compute the algorithm. As we mentioned when we defined the Hadamard gate, by applying multiple Hadamards on the entire quantum state of the quantum computer we set the state to a uniform superposition. It is here that we can feel another time the extreme power of quantum computing with respect its classical counterpart.
 			
-			\paragraph{Conclusion 5:} \emph{Applying operations on a quantum device whose state is in a uniform superposition allows to apply them simultaneously to all possible binary strings thanks to linearity.} 
+			\paragraph{Conclusion 5:} \label{conc:superposition} \emph{Applying operations on a quantum device whose state is in a uniform superposition allows to apply them simultaneously to all possible binary strings thanks to linearity.} 
 			
 		\subsection{Grover's Algorithm}
 		\label{sec:grover}
@@ -878,6 +881,113 @@ vector space $V \otimes W$ has basis $e_i \otimes f_j \forall i = 1,...,m, j = 1
 			
 			\subsubsection{Exactly 1 k-SAT}
 			\label{sec:quantumExatclyOne}
+				We have finally arrived to the most complete implementation we developed for this paper in order to have an algorithm that was able to solve first a 3-SAT instance and then its generalization to the k case. Before describing how we implemented the steps of Grover's algorithm to solve the problem let's remark the definition of an exactly 1 k-SAT problem.
+				
+				\paragraph{Definition (Exactly-1-k-SAT):} \emph{determining a satisfying assignment containing one true literal per clause.} \\
+				
+				This definition helps us to reduce the complexity in which a general k-SAT solver works (see qiskit's implementation at \ref{sec:quantumQiskitSolver}) and allows to realize an algorithm that performs iterations of Grover's algorithm to find the solutions. In the following we will describe precisely how the steps composing Grover's algorithm are implemented as the phenomenon of \emph{amplitude amplification} allows to modify the coefficients of the possible solutions for a given problem and find the best ones. In the end we will draw additional conclusions also for this case as we will have sufficient information to draw at best the comparison between all the algorithms we have described so far. \\
+				
+				As described in \cite[G.Nannicini, 2020]{introNoPh} three steps are needed to implement the solver, and the number of iterations of these steps is fundamental to find solutions that are significant. The following list describes precisely how we implemented the steps in the generalized version of a solver for a general \emph{exactly-1-k-SAT} problem with an arbitrary number of clauses:
+				
+				\begin{enumerate}
+					\item \textbf{Initialization:}\\
+					Grover's algorithm applies to a function with an n-qubit input and a single qubit output. We call \texttt{f\_in} the input register of the encoded function $U_f$, of size n, and \texttt{f\_out} the output register of $U_f$, of size 1. The initialization of a quantum algorithm, as we have discussed in the conclusion \ref{conc:superposition}, consists of applying the Hadamard gate to the quantum state composed of n-qubits in order to obtain the uniform superposition to work with. Thus the piece of code that corresponds to the method:
+				\end{enumerate}
+				\vspace{-0.2cm}
+				\begin{lstlisting}
+                 def input_state(circuit, f_in, f_out):
+				\end{lstlisting}
+				\vspace{-0.3cm}
+				\begin{figure}[h]
+					\hspace{-1.9cm}Is equivalent to the following circuit:\vspace{0.2cm} \\
+					\centering
+					\mbox{
+						\Qcircuit @C=1em @R=.7em {
+							\lstick{\texttt{f\_in} \ket{0}_n} & \qw & \qw {/}^n & \gate{\otimes^n\mathcal{H}} & \qw {/}^n \\
+							\lstick{\texttt{f\_out} \ket{0}_1} & \qw & \gate{X} & \gate{\mathcal{H}} & \qw
+					}}
+					\caption{Initialization step of Grover's algorithm}
+				\end{figure}
+				\begin{enumerate}[resume]
+					\item \textbf{Black-box function $U_f$}:\\
+					Implementing $U_f$ is the most complex part of the algorithm, in particular now that we want to generalize the case allowing the possibility to have more than 3 variables only. The problem of computing $U_f$ is in fact decomposed for each clause by introducing m auxiliary qubits, one per each clause. And for each clause we build a circuit that bit-flips the auxiliary qubit of the corresponding auxiliary qubit if and only if the clause has exactly one true literal. Finally, we apply a bit-flip on the output register of $U_f$ if and only if all m auxiliary qubits are 1. In figure \ref{fig:blackBoxCircuit} we can see the example of the circuit that we want to implement in order to flip the last qubit if the clause $x_1\lor \neg x_2\lor x_3 \lor \neg x_4$ is satisfied by exactly one literal. The circuit contains NOT gates to encode the negated variables and then to define the double implication of flipping $\ket{y}$ we first use 4 CNOTS to bring each qubit on the last one. Thus we now have $\ket{y} = \ket{y\oplus x_1 \oplus \neg x_2 \oplus x_3 \oplus \neg x_4}$, and with the quadruply-controlled gate leads the auxiliary qubit of the clause to $\ket{y}= \ket{y\oplus x_1 \oplus \neg x_2 \oplus x_3 \oplus \neg x_4 \oplus (x_1\land \neg x_2 \land x_3 \land \neg x_4)}$. This sets $\ket{y} = \ket{1}$ if and only if exactly one literal is satisfied because as we know from the initialization of every new qubit we always have the starting value of $\ket{0}$. 
+					\begin{figure}[h]
+						\centering
+						\mbox{
+							\Qcircuit @C=1em @R=.7em {
+								\lstick{\ket{x_1}} & \qw & \ctrl{4} & \qw & \qw & \qw & \ctrl{4} & \qw & \qw \\
+								\lstick{\ket{x_2}} & \gate{X} & \qw & \ctrl{3} & \qw & \qw & \ctrl{3} & \gate{X} & \qw \\
+								\lstick{\ket{x_3}} & \qw & \qw & \qw & \ctrl{2} & \qw & \ctrl{2} & \qw & \qw \\
+								\lstick{\ket{x_4}} & \gate{X} & \qw & \qw & \qw & \ctrl{1} & \ctrl{1} & \gate{X} & \qw \\
+								\lstick{\ket{y}} & \qw & \targ & \targ & \targ & \targ & \targ & \qw & \qw
+						}}
+						\caption{
+							\label{fig:blackBoxCircuit}
+							Circuit for the clause $x_1\lor \neg x_2\lor x_3 \lor \neg x_4$
+						}
+					\end{figure}
+					To implement this circuit in Qiskit there is a problem: only double controlled gates are implemented in the library. To overcome this issue we can easily concatenate CCNOT gates adding an ancillary qubit for each of the additional variables. In this way we will compute the partial results of the CCNOT between two variables and by storing this value in the first auxiliary qubit we continue with another CCNOT with the next variable. In the end we also perform another CCNOT with all the variables which targeted the auxiliary qubits to reset their state to the initial $\ket{0}$ and reuse them for the circuit of the following clauses. To understand better the mechanism of generalization we can see how the circuit is implemented in our algorithm in figure \ref{fig:generalizedBlackBoxCircuit}. In the circuit we represent how to realize a quadruply-controlled NOT gate with the reset of the auxiliary qubits initialized as $\ket{0}$. This fragment of the code is the one that substitutes the last gate that we can see above in the real implementation. As we can see we added two ancillary qubits $a_1$ and $a_2$ (initialized as $\ket{0}$) to "bring" the final result of the CNOT gate between the four variables $x_1, x_2, x_3, x_4$. 					
+					\begin{figure}[ht]
+						\centering
+						\mbox{
+							\Qcircuit @C=2em @R=.8em {
+								\lstick{\ket{x_1}} & \ctrl{4} & \qw & \qw & \qw & \ctrl{4} & \qw \\
+								\lstick{\ket{x_2}} & \ctrl{3} & \qw & \qw & \qw & \ctrl{3} & \qw \\
+								\lstick{\ket{x_3}} & \qw & \ctrl{3} & \qw & \ctrl{3} & \qw & \qw \\
+								\lstick{\ket{x_4}} & \qw & \qw & \ctrl{3} & \qw & \qw & \qw \\
+								\lstick{\ket{a_1}} & \targ & \ctrl{1} & \qw & \ctrl{1} & \targ & \qw \\
+								\lstick{\ket{a_2}} & \qw & \targ & \ctrl{1} & \targ & \qw & \qw \\
+								\lstick{\ket{y}} & \qw & \qw & \targ & \qw & \qw & \qw
+						}}
+						\caption{
+							\label{fig:generalizedBlackBoxCircuit}
+							Quadruply-controlled NOT gate
+						}
+					\end{figure}
+					Finally we are able to implement the $U_f$ function trivially by looping over all the clauses and implementing for each of these the circuit of figure \ref{fig:blackBoxCircuit}, setting the auxiliary qubit \texttt{aux[k]} to 1 if clause $C_{k+1}$ is satisfied. In the end the method that allows to perform an iteration of the black-box function $U_f$ is:
+				\end{enumerate}
+				\vspace{-0.3cm}
+				\begin{lstlisting}
+def black_box_u_f(circuit, f_in, f_out, aux, n, exactly_1_k_sat_formula):
+				\end{lstlisting}
+				
+				\begin{enumerate}[resume]
+					\item \textbf{Inversion about the average:}\\
+					The last operation we need to variate the coefficients of the possible quantum states of the solution is the inversion about the average. As precisely described in section \ref{sec:groverQuant} we can realize this operation with a unitary matrix that we called $W$. As we see from the definition (remember how to read the algebraic relation of a quantum circuit) we need first to perform Hadamard gates on the entire state, followed by the diagonal matrix $D$ and in the end negated Hadamard gates are performed once more on the entire quantum state. The implementation of $W$ is realized by the method:
+					\begin{lstlisting}
+def inversion_about_average(circuit, f_in, n):
+      /* ... */
+     def n_controlled_Z(circuit, controls, target):
+     /* ... */
+					\end{lstlisting}
+					To generalize the $D$ matrix we need to implement a $C^{n-1}Z$ gate (realized by \texttt{n\_controlled\_Z} defined above). Also in this case for more than 2 controls we need to realize multiple controlled NOT gates. In fact to realize the gate we round the controlled NOT gate of all the controls passed as argument of the method \texttt{n\_controlled\_Z}, with two Hadamard gates. Considering how we dealt with the problem of multiply-controlled NOT gates we can see in figure \ref{fig:cZgate} how the diagonal matrix $D$ is implemented for the case of 4 control qubits. In the actual implementation also in this case we reset the state of the ancillary qubits as they will be reused at the next iteration of the amplitude amplification phase.
+				\end{enumerate}
+				\newpage
+				\begin{figure}[ht]
+					\hspace{0.3cm}
+					\centering
+					\mbox{
+						\Qcircuit @C=1.5em @R=.8em {
+							\lstick{\ket{c_1}} & \qw & \ctrl{4} & \qw & \qw \\
+							\lstick{\ket{c_2}} & \qw & \ctrl{3} & \qw & \qw \\
+							\lstick{\ket{c_3}} & \qw & \ctrl{2} & \qw & \qw \\
+							\lstick{\ket{c_4}} & \qw & \ctrl{1} & \qw & \qw \\
+							\lstick{\ket{target}} & \gate{H} & \targ & \gate{H} & \qw
+					}}
+					\caption{
+						\label{fig:cZgate}
+						Theoretical $C^{n-1}Z$ gate
+					}
+				\end{figure}
+				Now that we have the complete implementation of all the steps that compose the amplitude amplification in grover's algorithm we have to choose how many time to iterate them in order to solve the problem. As it is done in \cite[G.Nannicini, 2020]{introNoPh} we decided to do the same by iterating twice the bit-flip and the inversion about the average steps. As we can see in the actual implementation, once the problem has been encoded in the quantum circuit we run the \texttt{grover} method in order to solve the instance. The definition of Grover's algorithm with two iterations is the following:
+				\begin{lstlisting}
+def grover(self):
+    self.__input_state()
+    self.__black_box_u_f()
+    self.__inversion_about_average()
+    self.__black_box_u_f()
+    self.__inversion_about_average()
+				\end{lstlisting}
 			
 			\subsubsection{Significant Results}
 			\label{sec:quantumResults}
