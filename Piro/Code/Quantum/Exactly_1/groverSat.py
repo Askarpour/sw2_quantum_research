@@ -15,7 +15,7 @@ class GroverSAT(object):
     def __init__(self, n, exactly_1_k_sat_formula):
         self.n = n
         self.exactly_1_k_sat_formula = exactly_1_k_sat_formula
-        self.f_in = QuantumRegister(n)
+        self.f_in = QuantumRegister(n, 'x')
         self.f_out = QuantumRegister(1)
         self.aux = QuantumRegister(len(exactly_1_k_sat_formula) + (max(n, len(exactly_1_k_sat_formula)) - 2))
         self.ans = ClassicalRegister(n)
@@ -27,6 +27,8 @@ class GroverSAT(object):
             self.circuit.h(self.f_in[j])
         self.circuit.x(self.f_out)
         self.circuit.h(self.f_out)
+        self.circuit.barrier()
+        self.circuit.barrier()
 
     def __black_box_u_f(self):
         """
@@ -53,7 +55,7 @@ class GroverSAT(object):
             s += 1
 
         # This backwards while is used to reset the state of all the auxiliary qubits used
-        s -= 2
+        s -= 3
         while s >= 0:
             if s == 0:
                 self.circuit.ccx(self.aux[0], self.aux[1], self.aux[num_clauses + target])
@@ -69,6 +71,8 @@ class GroverSAT(object):
             i = 0
             target = 0
             count = 0
+            second_literal = None
+
             # this loop ensures aux[k], the Quantum auxiliary register to be 1 if an odd number of literals are true
             for literal in clause:
                 count += 1
@@ -78,31 +82,44 @@ class GroverSAT(object):
                     self.circuit.x(self.f_in[-literal - 1])
                     self.circuit.cx(self.f_in[-literal - 1], self.aux[k])
 
-            while i < count:
-                if i == 0:
-                    self.circuit.ccx(self.f_in[0], self.f_in[1], self.aux[num_clauses + target])
-                    i += 1
-                elif i == count - 1:
-                    self.circuit.ccx(self.f_in[i], self.aux[num_clauses + target - 1], self.aux[k])
-                    target -= 2
-                else:
-                    self.circuit.ccx(self.f_in[i], self.aux[num_clauses + target - 1], self.aux[num_clauses + target])
-                target += 1
-                i += 1
-
-            # This backwards while is used to reset the state of all the auxiliary qubits used
-            i -= 2
-            while i >= 0:
-                if i == 0:
-                    self.circuit.ccx(self.f_in[0], self.f_in[1], self.aux[num_clauses + target])
-                else:
-                    self.circuit.ccx(self.f_in[i], self.aux[num_clauses + target - 1], self.aux[num_clauses + target])
-                target -= 1
-                i -= 1
+            self.circuit.barrier()
 
             for literal in clause:
-                if literal < 0:
+                qubit_pos = abs(literal)
+                if literal == second_literal:
+                    continue
+                elif literal == clause[0]:
+                    second_literal = clause[1]
+                    self.circuit.ccx(self.f_in[qubit_pos - 1], self.f_in[abs(second_literal) - 1],
+                                     self.aux[num_clauses + target])
+                elif literal == clause[len(clause) - 1]:
+                    self.circuit.ccx(self.f_in[qubit_pos - 1], self.aux[num_clauses + target - 1], self.aux[k])
+                    target -= 2
+                else:
+                    self.circuit.ccx(self.f_in[qubit_pos - 1], self.aux[num_clauses + target - 1],
+                                     self.aux[num_clauses + target])
+                target += 1
+
+            for literal in reversed(clause[:len(clause) - 1]):
+                qubit_pos = abs(literal)
+                if literal == clause[0]:
+                    break
+                elif literal == second_literal:
+                    self.circuit.ccx(self.f_in[abs(clause[0]) - 1], self.f_in[qubit_pos - 1],
+                                     self.aux[num_clauses + target])
+                else:
+                    self.circuit.ccx(self.f_in[qubit_pos - 1], self.aux[num_clauses + target - 1],
+                                     self.aux[num_clauses + target])
+                target -= 1
+
+            self.circuit.barrier()
+
+            for literal in clause:
+                 if literal < 0:
                     self.circuit.x(self.f_in[-literal - 1])
+
+            self.circuit.barrier()
+            self.circuit.barrier()
 
     def __inversion_about_average(self):
         """This methods applies the inversion about the average step of Grover's algorithm"""
@@ -111,6 +128,8 @@ class GroverSAT(object):
         for j in range(self.n):
             self.circuit.x(self.f_in[j])
         self.__n_controlled_z([self.f_in[j] for j in range(self.n-1)])
+        for j in range(self.n):
+            self.circuit.x(self.f_in[j])
         for j in range(self.n):
             self.circuit.h(self.f_in[j])
 
@@ -122,29 +141,34 @@ class GroverSAT(object):
         final_target = self.f_in[self.n - 1]
         self.circuit.h(final_target)
 
-        while i < len(controls):
-            if i == 0:
-                self.circuit.ccx(controls[0], controls[1], self.aux[num_clauses + temp_target])
+        if len(controls) == 1:
+            self.circuit.cx(controls[0], final_target)
+        elif len(controls) == 2:
+            self.circuit.ccx(controls[0], controls[1], final_target)
+        else:
+            while i < len(controls):
+                if i == 0:
+                    self.circuit.ccx(controls[0], controls[1], self.aux[num_clauses + temp_target])
+                    i += 1
+                elif i == len(controls) - 1:
+                    self.circuit.ccx(controls[i], self.aux[num_clauses + temp_target - 1], final_target)
+                    temp_target -= 2
+                else:
+                    self.circuit.ccx(controls[i], self.aux[num_clauses + temp_target - 1], self
+                                     .aux[num_clauses + temp_target])
+                temp_target += 1
                 i += 1
-            elif i == len(controls) - 1:
-                self.circuit.ccx(controls[i], self.aux[num_clauses + temp_target - 1], final_target)
-                temp_target -= 2
-            else:
-                self.circuit.ccx(controls[i], self.aux[num_clauses + temp_target - 1], self
-                                 .aux[num_clauses + temp_target])
-            temp_target += 1
-            i += 1
 
-        # This backwards while is used to reset the state of all the auxiliary qubits used
-        i -= 2
-        while i >= 0:
-            if i == 0:
-                self.circuit.ccx(controls[0], controls[1], self.aux[num_clauses + temp_target])
-            else:
-                self.circuit.ccx(controls[i], self.aux[num_clauses + temp_target - 1], self
-                                 .aux[num_clauses + temp_target])
-            temp_target -= 1
-            i -= 1
+            # This backwards while is used to reset the state of all the auxiliary qubits used
+            i -= 3
+            while i >= 0:
+                if i == 0:
+                    self.circuit.ccx(controls[0], controls[1], self.aux[num_clauses + temp_target])
+                else:
+                    self.circuit.ccx(controls[i], self.aux[num_clauses + temp_target - 1], self
+                                     .aux[num_clauses + temp_target])
+                temp_target -= 1
+                i -= 1
 
         self.circuit.h(final_target)
 
@@ -158,7 +182,7 @@ class GroverSAT(object):
 
     @classmethod
     def from_file(cls, file):
-        exactly_1_3_sat_formula = []
+        exactly_1_k_sat_formula = []
         m = 0
         for line in file:
             line = line.strip()
@@ -167,11 +191,11 @@ class GroverSAT(object):
                 temp = 0
                 for literal in line.split():
                     clause.append(int(literal))
-                    temp += 1
-                exactly_1_3_sat_formula.append(clause)
+                    temp = abs(int(literal))
+                exactly_1_k_sat_formula.append(clause)
                 m = temp if temp > m else m
 
-        return cls(m, exactly_1_3_sat_formula)
+        return cls(m, exactly_1_k_sat_formula)
 
     def solve(self, b):
         if b:

@@ -1,8 +1,10 @@
 """
 This is the main class where we build the instance of the circuit and run Grover's search un order to find the
-solution to our Exactly-1 3-SAT problem.
+solution to our Exactly-1 k-SAT problem.
 
-We have extended this implementation to deal with a number of variables greater than 3
+We can assume that the variables of each clause are provided in a file in increasing order; without loss of
+generality this assumption allows us to manage easier the configuration of the quantum circuit able to solve
+the problem.
 """
 
 from sys import argv
