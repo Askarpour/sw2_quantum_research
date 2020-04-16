@@ -1,3 +1,9 @@
+QUANTUM PRINCIPAL COMPONENT ANALYSIS
+=================
+
+References
+----------------
+
 Practical implementation of quantum pca: https://arxiv.org/pdf/1904.05803.pdf
 
 Question about our problem: https://quantumcomputing.stackexchange.com/questions/9701/quantum-pca-state-preparation
@@ -9,3 +15,5 @@ Density matrix: pure vs mixed : https://quantumcomputing.stackexchange.com/quest
 Question about implementing quantum PCA : https://quantumcomputing.stackexchange.com/questions/9375/cannot-replicate-results-in-article-on-pricing-financial-derivatives-on-ibm-q
 
 Quantum gates: https://qiskit.org/textbook/ch-gates/quantum-gates.html
+
+
