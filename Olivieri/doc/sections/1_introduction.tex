@@ -1,0 +1,28 @@
+\section{Introduction}
+\subsection{Random Walks}
+A random walk, also known as a stochastic or random process, is a mathematical object which describe a path constitued by random step over a mathematical space. A common 
+example is a random walk in the integer set Z, starting from a certain point, for instance x=0, the path is defined by randomly choose to move left or right by increase 
+or decrease the actual value of x by 1. Tossing a coin will help in choosing randomly, with equal probability, the next step to take. 
+The previous example could be generalized by increasing the dimension of the mathematical space considered, in a cartesian plane the starting point will have two  
+coordinates and the possible moves becomes 4.
+The random walk can be divided in two major classes, discrete and continous random walks, here we focus on the discrete-time, in particular we bind this to graphs
+to perform the search of a marked vertex.
+
+\subsection{Quantum Walks}
+
+First is worth to give an idea of the random walk above in the quantum world. We can consider a cycle graph like the one in Figure 1. The nodes of the graph can be 
+represented by binary labels, so that we need log(N) quibits to represents a cycle graph with N nodes. Now in order to perform a random walk on this graph we need a
+way to define a shift operator, i.e. an operator that allows to move, from our current position, in one of the adjiacent nodes and a coin operator that choose randomly
+the direction to take, left or right in this case. 
+
+In the example proposed, considering the current position as $\ket{i}$ shift operator S can move the walker in the left or right position to obtain $\ket{i+1}$ or $\ket{i-1}$ 
+the coin operator C will decide with probability 1/2 wheter to increment or decrement. Defined this two operators 
+the quantum walk operator can be seen as U = SC, applying once this operator U correspond to a random walk step.
+The states space H in which the walk operator moves is the one defined the two Hilbert spaces, one for the shift operator that we can call 
+$\mathcal{H}_{p} = {|i> where i = 0...N-1 and i belonging to Z}$ and the one for coin operator called $\mathcal{H}_{c}$ and that in our case can be spanned for instance by 
+{$\ket{left}$, $\ket{right}$} finally H is given by $\mathcal{H}=\mathcal{H}_{p}\otimes\mathcal{H}_{c}$. This informal explanation is trheated in details by \cite{Kempe_2003}. 
+
+In the example we will use an Hadamard coin, that can simulate a coin toss to decide wheter increment or decrement the actual state. The behavior of the Hadamard coin 
+will be described after the implementation of the example below presented.
+
+

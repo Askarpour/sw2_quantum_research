@@ -1,0 +1,18 @@
+\section{Generalization and results}
+
+The example shown above can be generalized in all aspects, let's start with the graph nodes.
+We have considered for the eample a 8-node graph, but considering the generalized N-node version, are necessary
+auxiliary qubits for creating multi controlled toffoli gates. Depending on the chosen mode
+to implement the multi toffoli gate if the control bits are greater than 2 can be required 
+a number of ancillary bits equal to the number of control quibits CQ - 1.
+
+Another generalization concerns the type of graph, by modifying the circuit appropriately it is possible to
+perform a random walk in different types of graphs including, glued trees, complete graphs etc. a 
+detailed presentation of the various types of graphs with their circuit is present in \cite{douglas2007efficient}
+
+Shift and Coin operators can also be generalized for various applications, for the Coin operator in
+particular there are different forms with different properties, the Hadamard coin presented above shows a peculiarity
+of the Quantum, one would also expect for the Quantum a Gaussian distribution of T-step node visits
+as happens in the classic version, in reality the distribution obtained is asymmetrical. Figure 2 below shows that 
+the results after T steps in the cyclic graph. More details about this behavior and alternatives 
+symmetrical to the Hadamard coin can be found in \cite{Kempe_2003}

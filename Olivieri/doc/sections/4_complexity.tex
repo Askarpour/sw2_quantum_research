@@ -1,0 +1,14 @@
+\section{Complexity and problem definition}
+
+To talk about complexity in Quantum Walks we need to introduce the concept of Hitting Time. A definition can be found in \cite{6812670}
+\\
+\textbf{definition: Hitting Time}  
+
+
+
+Now we can define the problem of searching for a marked vertex. Given the example proposed, using the Hadamard coin, of a 
+cyclic graph with 8 nodes, to search for a marked vertex starting from given vertex we need to perform a walk in the graph 
+and see if the current vertex is the one we are searching. The problem here is how often perform a measure, this choice
+will impact also on the performances, indeed if we measure the circuit at each step we loose all the advantages of the quantum
+coerenches and the performances will be equals to classical, we can gain some advantages by set the probability of measuring
+very small \cite{Kempe_2003}.    
