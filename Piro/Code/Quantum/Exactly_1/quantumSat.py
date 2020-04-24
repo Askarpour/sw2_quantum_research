@@ -9,7 +9,7 @@ the problem.
 
 from sys import argv
 
-from Quantum.Exactly_1.groverSat import GroverSAT
+from groverSat import GroverSAT
 from qiskit.visualization import *
 import matplotlib.pyplot as plt
 

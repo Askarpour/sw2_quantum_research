@@ -6,7 +6,7 @@ of the 3-SAT that has been parsed.
 
 from sys import argv
 
-from Quantum.DecisionVersion.satInstance import SATInstance
+from satInstance import SATInstance
 from qiskit import QuantumRegister
 from qiskit.visualization import *
 import matplotlib.pyplot as plt
