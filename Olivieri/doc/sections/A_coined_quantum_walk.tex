@@ -1,0 +1,56 @@
+\section{Coined Quantum walk}
+This code below is referred to coined quantum walk, using Hadamard coin for a
+cycle graph with number of nodes N=3.
+\enlargethispage{\baselineskip}
+
+\begin{lstlisting}[breaklines,language=Python]
+from qiskit import *
+
+#increment operator for a 3-bit state register
+def increment_op(circuit):
+    qr = circuit.qubits
+    circuit.mct([qr[0],qr[1],qr[2]],qr[3],None,mode='noancilla')
+    circuit.ccx(qr[0],qr[1],qr[2])
+    circuit.cx(qr[0],qr[1])
+    circuit.barrier()
+    return circuit
+
+#decrement operator for a 3-bit state register
+def decrement_op(circuit):
+    qr = circuit.qubits
+    circuit.x(qr)   
+    circuit.barrier()
+    circuit.mct([qr[0],qr[1],qr[2]],qr[3],None,mode='noancilla')
+    circuit.ccx(qr[0],qr[1],qr[2])
+    circuit.cx(qr[0],qr[1])
+    circuit.barrier()
+    circuit.x(qr)
+    return circuit
+
+#construct the circuit for one step of the random walk
+def random_walk_step(circuit):
+    #increment operator circuit
+    qr_incr = QuantumRegister(4)
+    increment_circ = QuantumCircuit(qr_incr, name='increment')
+    increment_op(increment_circ)
+    increment_inst = increment_circ.to_instruction()
+
+    #decrement operator circuit
+    qr_decr = QuantumRegister(4)
+    decrement_circ = QuantumCircuit(qr_decr, name='decrement')
+    decrement_op(decrement_circ)
+    decrement_inst = decrement_circ.to_instruction()
+
+    circuit.h(qr[0])
+    circuit.append(increment_inst, qr[0:4])
+    circuit.append(decrement_inst, qr[0:4])
+    
+    return circuit   
+
+def random_walk(steps, circuit):
+    for i in range(0, steps):
+        random_walk_step(circuit)
+    return circuit  
+
+\end{lstlisting}
+%\lstinputlisting[breaklines,breakatwhitespace,caption=inputenc,language=Python]{code/coined_quantum_walk.py}

@@ -3,3 +3,11 @@ doc/doc.aux
 doc/doc.fls
 doc/doc.log
 doc/doc.synctex.gz
+doc/doc.bbl
+doc/doc.bcf
+doc/doc.blg
+doc/doc.run.xml
+doc/quantikz.tex
+doc/doc.fdb_latexmk
+doc/quantikz.zip
+doc/tikzlibraryquantikz.code.tex
