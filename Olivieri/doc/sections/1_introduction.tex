@@ -1,28 +1,65 @@
 \section{Introduction}
 \subsection{Random Walks}
+
+% random walk definition
 A random walk, also known as a stochastic or random process, is a mathematical object which describe a path constitued by random step over a mathematical space. A common 
-example is a random walk in the integer set Z, starting from a certain point, for instance x=0, the path is defined by randomly choose to move left or right by increase 
-or decrease the actual value of x by 1. Tossing a coin will help in choosing randomly, with equal probability, the next step to take. 
-The previous example could be generalized by increasing the dimension of the mathematical space considered, in a cartesian plane the starting point will have two  
-coordinates and the possible moves becomes 4.
-The random walk can be divided in two major classes, discrete and continous random walks, here we focus on the discrete-time, in particular we bind this to graphs
-to perform the search of a marked vertex.
+example is a random walk in a line, consider the integer set Z, starting from a certain point, for instance x = 0, the path is defined by randomly choose to move left or 
+right, the movement is achieved increasing or decreasing the value of x by 1. Tossing a coin will help in choosing randomly, with equal probability, the next step to take. 
+This example could be generalized by increasing the dimension of the mathematical space considered, in a cartesian plane the starting point will have two  
+coordinates and the possible moves becomes 4, and there are many other possible generalizations.
+
+%random walk discrete and continous
+The random walk can be divided in two major classes, discrete-time and continous-time random walk. Intuitively as the names suggest the difference between this two class 
+is in the time function that could be integer or real, for a more formal definition consider the random walk as a system composed by a family of random variables ${X_{t}}$
+the variables $X_{t}$ will measure the system at time t, now if we consider $t\in \mathbb{N}$  is a discrete-time stochastic process, otherwise if 
+$t \in \mathbb{R}^{+} \bigcup {0}$ is a continous-time stochastic process. 
+
+% final
+Here we focus on the discrete-time, in particular we bind this to graphs considering the random walk on a cyclic graph of order N.
 
 \subsection{Quantum Walks}
 
-First is worth to give an idea of the random walk above in the quantum world. We can consider a cycle graph like the one in Figure 1. The nodes of the graph can be 
-represented by binary labels, so that we need log(N) quibits to represents a cycle graph with N nodes. Now in order to perform a random walk on this graph we need a
-way to define a shift operator, i.e. an operator that allows to move, from our current position, in one of the adjiacent nodes and a coin operator that choose randomly
-the direction to take, left or right in this case. 
+The Quantum version of the random walks is called Quantum Walks, also here there is a disctinction between the two model of discrete quantum walks and 
+continous quantum walks, the focus of this research remain in the discrete-time domain also for the quantum side. 
 
-In the example proposed, considering the current position as $\ket{i}$ shift operator S can move the walker in the left or right position to obtain $\ket{i+1}$ or $\ket{i-1}$ 
-the coin operator C will decide with probability 1/2 wheter to increment or decrement. Defined this two operators 
-the quantum walk operator can be seen as U = SC, applying once this operator U correspond to a random walk step.
-The states space H in which the walk operator moves is the one defined the two Hilbert spaces, one for the shift operator that we can call 
-$\mathcal{H}_{p} = {|i> where i = 0...N-1 and i belonging to Z}$ and the one for coin operator called $\mathcal{H}_{c}$ and that in our case can be spanned for instance by 
-{$\ket{left}$, $\ket{right}$} finally H is given by $\mathcal{H}=\mathcal{H}_{p}\otimes\mathcal{H}_{c}$. This informal explanation is trheated in details by \cite{Kempe_2003}. 
+The discrete quantum walk described here is called coined Discrete Quantum Walk on a Line (Coined DQWL), there are also versions without coin. It's worth introducing
+the Coined QDWL in a formal and generic way, then apply to a more concrete example. A formal description starts considering the three main components of a Coined QDWL: 
+A walker operator, a coin, an evolution operator usually called shift operator. 
 
-In the example we will use an Hadamard coin, that can simulate a coin toss to decide wheter increment or decrement the actual state. The behavior of the Hadamard coin 
-will be described after the implementation of the example below presented.
+% the walker
+The Walker represents the position of our system and is defined in a Hilbert space inifite but countable $\mathcal{H}_{p}$, a vector in that space represents 
+the postion of the walker, $\ket{position} \in \mathcal{H}_{p}$ 
+
+% the coin
+The coin operator is defined in a two-dimension Hilbert space, if we consider as basis state $\ket{0}$ and $\ket{1}$ then the coin space will becomes
+$\mathcal{H}_{c} = { \ket{0}, \ket{1} }$ and with $\ket{coin} \in \mathcal{H}_{c}$.
+
+The complete system finally will be in a Hilbert space composed by the Kronecker product of the two spaces above defined 
+$\mathcal{H}=\mathcal{H}_{p}\otimes\mathcal{H}_{c}$. A state of the coined DQWL can be defined by the vector:
+
+\begin{equation}
+    \ket{\phi_{initial}} = \ket{position}_{initial} \otimes \ket{coin}_{initial}
+\end{equation}
+
+% the evolution operator
+The evolution operator, also called shift operator will actually perform a step starting from the initial position, apply this operator to the
+system is equal to toss a coin and depending on the outcome move the walker to the left or to the right, we can do this by increment or decrement
+the actual position by 1. A possible form of the shift operator could be described by this formula:
+
+\begin{equation}
+    S = \ket{0}_{c} \bra{0} \otimes \sum{i} \ket{i + 1}_{p} \bra{i} + \ket{1}_{c} \bra{1} \otimes \sum{i} \ket{i - 1}_{p} \bra{i} 
+\end{equation}
+
+Finally we can see a walker as operator itself, called U and given by:
+
+\begin{equation}
+    U = S \times (C \otimes I_{p})
+\end{equation}
+
+Applying this operator to a given system is equal to perform a step of a random walk. A more formal explanation can be found in \cite{6812670} and \cite{Kempe_2003}.
+The example on the following section apply this general concept to a cyclic graph.
+
+
+
 
 

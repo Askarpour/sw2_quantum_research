@@ -1,0 +1,23 @@
+\section{Szegedy quantum walk introduction}
+
+The following method proposed by Szegedy helps to reduce some limitations discussed in the previous section. In order to 
+talk about Szegedy algorithm we need to define introduct some concepts.
+
+\subsection{Markow chains}
+
+A Markow chain is a stochastic process that consists in a sequence of random variables $X_{n}$ with $n \in \mathbb{Z}^{+}$
+such that $P(X_{n} | X_{n-1}, X_{n-2},...,X_{n-N}) = P(X_{n} | X_{n-1})$. If is time-independent can be represented
+by a matrix P called transition matrix. Such that the sum of each row of P is equal to 1.
+
+\subsection{application to graphs}
+
+We can use then a Markow Chain to perform a random walk on a graph. First, considering a graph G(V,E) we construct the adjacency matrix
+as follows:
+
+\begin{equation}
+    A_{i,j} = 
+    \begin{cases} 
+        1 if (v_{i}, v_{j}) \in E \\
+        0 otherwise
+    \end{cases}
+\end{equation}
