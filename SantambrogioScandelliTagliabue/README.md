@@ -16,6 +16,6 @@ Question about implementing quantum PCA : https://quantumcomputing.stackexchange
 
 Quantum gates: https://qiskit.org/textbook/ch-gates/quantum-gates.html
 
-Latex file: https://www.overleaf.com/read/fqnqvhtbmnb
+Latex file: https://www.overleaf.com/read/fqnqvhtbmnbq
 
 
