@@ -1076,7 +1076,7 @@ def grover(self):
 						As we can see from the formulation of the third problem (\ref{sec:problem3}) and from the results of the execution of the classical solver, the problem is trivially satisfiable for example with $S = \{\neg x_1, x_2, \neg x_3\}$. But this one is not a solution for the exactly-1 formulation of this problem, in fact we can see that in the second clause both $\neg x_1$ and $\neg x_3$ make the disjunction true. The exactly-1 Problem 3 has no solutions and the result we obtained from the execution of our solver is shown in figure \ref{fig:problem3Solution}:
 						\begin{figure}[h]
 							\centering
-							\includegraphics[scale=0.45]{Problem_3_Solution.png}
+							\includegraphics[scale=0.41]{Problem_3_Solution.png}
 							\caption{
 								\label{fig:problem3Solution}
 								Solution of the exactly-1 Problem 3
@@ -1089,14 +1089,14 @@ def grover(self):
 						As we can see from the formulation of the fourth problem (\ref{sec:problem4}), the trivial solution of this 4 variables and 4 clauses exactly-1 4-SAT problem is $S=\{x_1, x_2, x_3, x_4\}$. This problem has been used to show the correct working of the solver that generalizes the problem of an exactly-1 k-SAT problem with an arbitrary number of clauses. Executing our solver we obtained the solution shown in the following picture (\ref{fig:problem4Solution}):
 						\begin{figure}[h]
 							\centering
-							\includegraphics[scale=0.46]{Problem_4_Solution.png}
+							\includegraphics[scale=0.42]{Problem_4_Solution.png}
 							\caption{
 								\label{fig:problem4Solution}
 								Solution of the exactly-1 Problem 4
 							}
 						\end{figure}
 					
-						As we can see from the picture above the result is the string $1111$, representing the solution $S$ provided before, with a probability near the $70\%$ significantly higher than all the other probabilities. As we may have noticed there is also another solution with a probability near the $25\%$ that leaps over the other infinitesimal ones. We can conclude that the string $0001$ corresponding to this higher probability is the cause of the number of iterations of the steps in Grover's algorithm that we have said to be the most important issue for the implementation to obtain a solution that is noise free.
+						As we can see from the picture above the result is the string $1111$, representing the solution $S$ provided before, with a probability near the $90\%$ significantly higher than all the other probabilities. 
 				\end{itemize}
 				Now that we have shown how the implementation of the exactly-1 solver is able to provide the correct solutions even for the generalized formulation where more than 3 variables are present in a single clause, it is important to show how is shaped the circuit that allows us to find the solution. In order to show how the generalization of each of the three steps of Grover's search is implemented in the circuit, considering \textbf{Problem 4} we can now see how each of the step is reflected in the actual circuit that is run on the quantum device. As we have precisely described in the implementation of the exactly-1 k-SAT problem (section \ref{sec:quantumExactlyOne}) the three steps are:
 				\begin{enumerate}
@@ -1104,7 +1104,7 @@ def grover(self):
 						The first thing we need to do in order to build the quantum circuit is to bring the state composed of the 4 qubits representing the four variables in a uniform superposition. In order to do so we consider an additional qubit and apply on the first four the Hadamard gate while on the additional one we apply in sequence an X gate followed by another Hadamard. The result of the initialization step for the exactly-1 \textbf{Problem 4} is shown in the following figure (\ref{fig:initializationCircuit}):
 						\begin{figure}[h]
 							\centering
-							\includegraphics[scale=0.6]{Initialization_Circuit.png}
+							\includegraphics[scale=0.8]{Initialization_Circuit.png}
 							\caption{
 								\label{fig:initializationCircuit}
 								Initialization fragment in Problem 4 circuit
