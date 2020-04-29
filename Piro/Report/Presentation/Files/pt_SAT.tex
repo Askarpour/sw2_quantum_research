@@ -218,12 +218,80 @@
 	
 	\subsection{Classic vs. Quantum}
 		\begin{frame}{Classic vs. Quantum}
-		
+			\small
+			\begin{itemize}
+				\item[$\bullet$] \textbf{Complexity}
+					\begin{itemize}
+						\item[\tiny$\bullet$] \textbf{Space Complexity}\\
+							\emph{Gates and depth explosion in Qiskit solver}\\
+							\emph{Exponential growth of qubits to represent the quantum state}\\
+							\emph{No-cloning principle} 
+						
+						\item[\tiny$\bullet$] \textbf{Time Complexity}\\
+							\emph{QFT approach may lead to the number of elementary instructions}\\
+							\emph{Grover's search provides a \textbf{quadratic speedup}}
+					\end{itemize}
+				
+				\item[$\bullet$] \textbf{Implementation:} \\
+					\emph{Classical and quantum algorithms do not have an exact correspondence}\\
+					\emph{We have a \textbf{zoo} of quantum algorithms to be reused in order to solve our problem}\\
+					\emph{The \textbf{programming paradigm} is completely changed}
+			\end{itemize}
+		\end{frame}
+	
+		\begin{frame}{Time Complexity}
+			\small
+			The algorithm we introduced for the classical solvers run in time
+			\vspace{-0.2cm}
+			\begin{equation*}
+				\centering
+				\mathcal{O}(T(n)poly(n))
+				\vspace{-0.2cm}
+			\end{equation*}
+			where $T(n)$ is an exponentially growing function of n. These algorithms are based on a \textbf{polynomial-time} algorithm that outputs the satisfying assignments, if one exists, with probability at least $1/T$.\\
+			
+			\vspace{0.2cm}
+			
+			\textbf{To make a SAT problem satisfiable we will run the algorithm $\mathcal{O}(T(n))$ times}\\
+			
+			\vspace{0.3cm}
+			
+			With Grover and in particular \textbf{Amplitude Amplification} we can decide if an algorithm accepts with probability $0$ or $1/T$ running it only the $\mathcal{O}(\sqrt{T(n)})$ of the times.\\
+			
+			\vspace{0.2cm}
+			
+			In conclusion applying Grover to a k-SAT solver brings to the \textbf{quadratic speedup} we promised:
+			\vspace{-0.2cm}
+			\begin{equation*}
+				\centering
+				\mathcal{O}(\sqrt{T(n)}poly(n))
+			\end{equation*}  
 		\end{frame}
 		
 	\subsection{Conclusions}
 		\begin{frame}{Conclusions}
-		
+			\begin{itemize}
+				\item[1.] <1-> \textbf{Gap} between the quantum implementation and its real deploy on a device
+				
+				\item[2.] <2-> \textbf{Exponential growth} of the quantum state
+				
+				\item[3.] <3-> \textbf{Theoretical} time speedups
+				
+				\item[4.] <4-> \textbf{Zoo} of quantum algorithms to solve our problems
+				
+				\item[5.] <5-> The \textbf{role} of the computer scientist
+				
+				\item[6.] <6-> New \textbf{programming paradigm}
+			\end{itemize}
+		\end{frame}
+	
+		\begin{frame}{Qiskit's Contributor}
+			\small
+			I became contributor of the \textbf{Qiskit library} by solving the following issue
+			\begin{figure}[h]
+				\centering
+				\includegraphics[scale=0.3]{qiskitIssue.png}
+			\end{figure}
+			Link to the \href{https://github.com/Qiskit/qiskit-terra/pull/3751}{\textbf{Pull Request}}
 		\end{frame}
 		
-	
