@@ -11,3 +11,9 @@ doc/quantikz.tex
 doc/doc.fdb_latexmk
 doc/quantikz.zip
 doc/tikzlibraryquantikz.code.tex
+presentation/presentation.out
+presentation/presentation.log
+presentation/presentation.aux
+presentation/presentation.nav
+presentation/presentation.snm
+presentation/presentation.toc

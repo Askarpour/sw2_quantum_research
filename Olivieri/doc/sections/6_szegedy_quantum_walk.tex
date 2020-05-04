@@ -1,7 +1,7 @@
-\section{Szegedy quantum walk introduction}
+\section{Szegedy quantum walk}
 
 The following method proposed by Szegedy helps to reduce some limitations discussed in the previous section. In order to 
-talk about Szegedy algorithm we need to define introduct some concepts.
+talk about Szegedy algorithm we need to introduct some concepts.
 
 \subsection{Markow chains}
 
@@ -21,3 +21,17 @@ as follows:
         0 otherwise
     \end{cases}
 \end{equation}
+
+Then we can define the transition matrix P as:
+
+\begin{equation}
+    P_{i,j} = frac{A_{i,j}}{indeg(j)}
+\end{equation}
+
+where indeg(j) represents the number of in-going arc of vertex j. Basically we can express the graph with this transition matrix, this lead to a
+generalization of the quantum walks presented. The previous method uses the label encoding to represent the graph and was limited to undirected graphs
+without weights. The Szegedy algorithm instead uses the matrix representation explained above, therefore there are no problem if the graph is directed
+or even if has weights. 
+
+\subsection{The szegedy QW operator}
+The szegedy quantum operator
