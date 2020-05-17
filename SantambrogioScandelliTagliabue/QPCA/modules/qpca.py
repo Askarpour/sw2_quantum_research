@@ -110,17 +110,19 @@ def qpca(covmat, NBITS, initialeig = None, iterations=1, simulator=BasicAer.get_
     print("first_approx", last_approx)
     while(iteration<iterations):
         #Generate the first circuit that measures on z basis
+        counts = []
         circuit = generate_circuit(last_approx, covmat, NBITS, PSIBITS, "z"*(PSIBITS+NBITS))
-        job = execute(circuit, simulator, shots=req_shots//2)
-        result = job.result().data(circuit)
-        countsZ = job.result().get_counts()
-        #Generate the second circuits that measures the psibits on the x basis
-        circuit = generate_circuit(last_approx, covmat, NBITS, PSIBITS, "z"*NBITS+"x"*PSIBITS)
-        job = execute(circuit, simulator, shots=req_shots//2)
-        result = job.result().data(circuit)
-        countsX = job.result().get_counts()
-        last_approx = fin_eigv(countsZ, countsX, PSIBITS)
+        job = execute(circuit, simulator, shots=req_shots//PSIBITS)
+        res = job.result().get_counts()
+        counts.append(res)
+        for i in range(PSIBITS):
+            mask = "z"*(NBITS+PSIBITS-i-1)+"x"+"z"*i
+            circuit = generate_circuit(last_approx, covmat, NBITS, PSIBITS, mask)
+            job = execute(circuit, simulator, shots=req_shots//PSIBITS)
+            res = job.result().get_counts()
+            counts.append(res)
+        #TODO: last_approx = fin_eigv(countsZ, countsX, PSIBITS)
         print("last_approx",last_approx)
         iteration+=1
-    return QPCAResult((countsZ,countsX), np.array(last_approx), circuit, PSIBITS, NBITS)
+    return QPCAResult(counts, np.array(last_approx), circuit, PSIBITS, NBITS)
 

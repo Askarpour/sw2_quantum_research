@@ -60,3 +60,10 @@ def fin_eigv(countsZ, countsX, PSIBITS):
             mindiff = tdiff
             mincomb = i
     return np.multiply(sumsZ, mincomb)
+
+def rel_sign(vect, measurement, n):
+    meas = sorted(measurement.items())
+    for i in range(0,len(vect),2):
+            if meas[i*(2**n)][1] < meas[(i+1)*(2**n)][1]:
+                vect[i+1] *= -1
+    return vect
