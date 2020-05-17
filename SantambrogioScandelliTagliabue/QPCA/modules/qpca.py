@@ -116,7 +116,7 @@ def qpca(covmat, NBITS, initialeig = None, iterations=1, simulator=BasicAer.get_
         res = job.result().get_counts()
         counts.append(res)
         for i in range(PSIBITS):
-            mask = "z"*(NBITS+PSIBITS-i-1)+"x"+"z"*i
+            mask = "z"*(NBITS+i)+"x"+"z"*(PSIBITS-i-1)
             circuit = generate_circuit(last_approx, covmat, NBITS, PSIBITS, mask)
             job = execute(circuit, simulator, shots=req_shots//PSIBITS)
             res = job.result().get_counts()
