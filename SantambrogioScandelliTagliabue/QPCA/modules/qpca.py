@@ -107,7 +107,6 @@ def qpca(covmat, NBITS, initialeig = None, iterations=1, simulator=BasicAer.get_
     REALDIM=len(covmat)
     covmat, PSIBITS = preprocess_mat(covmat)
     last_approx = generatefirst(PSIBITS, REALDIM, initialeig)
-    print("first_approx", last_approx)
     while(iteration<iterations):
         #Generate the first circuit that measures on z basis
         counts = []
@@ -122,7 +121,6 @@ def qpca(covmat, NBITS, initialeig = None, iterations=1, simulator=BasicAer.get_
             res = job.result().get_counts()
             counts.append(res)
         #TODO: last_approx = fin_eigv(countsZ, countsX, PSIBITS)
-        print("last_approx",last_approx)
         iteration+=1
     return QPCAResult(counts, np.array(last_approx), circuit, PSIBITS, NBITS)
 
