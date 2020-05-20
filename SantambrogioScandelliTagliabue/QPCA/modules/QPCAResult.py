@@ -27,7 +27,6 @@ class QPCAResult(object):
         self._lastcirc=lastcirc
         self.possible_keys = set().union(*eigvals_dics)
         self.eigvalcounts = {k: sum([i.get(k,0) for i in eigvals_dics]) for k in self.possible_keys}
-        print(self.eigvalcounts)
     def get_eigvals(self, sort=True):
         return (sorted(self.eigvalcounts.items(), key=lambda x:x[1]) if sort else self.eigvalcounts)
     def eigvec_from_eigval(self, eigval):
