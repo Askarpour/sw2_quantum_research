@@ -36,6 +36,22 @@ class QPCAResult(object):
         return eigv
     def get_last(self):
         return self._lastcirc
+    def merge(self, other):
+        if self.psibits!= other.psibits or self.nbits!=other.nbits:
+            raise ValueError("Invalid merge")
+        for i in other.eigvalcounts.keys():
+            if i not in self.eigvalcounts.keys():
+                self.eigvalcounts[i] = other.eigvalcounts[i]
+            else:
+                self.eigvalcounts[i] += other.eigvalcounts[i]
+        for i in range(len(self._counts)):
+            for j in other._counts[i].keys():
+                if j not in self._counts[i].keys():
+                    self._counts[i][j] = other._counts[i][j]
+                else:
+                    self._counts[i][j] += other._counts[i][j]
+        
+        
 
 """
 Utility function that converts a binary number string in a decimal number
