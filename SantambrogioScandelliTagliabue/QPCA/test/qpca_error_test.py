@@ -1,11 +1,12 @@
 import sys
-# insert at 1, 0 is the script path (or '' in REPL)
+import pickle
 sys.path.insert(1, '../modules')
 from qpca import qpca
 from test_utils import create_matrix
 from test_utils import create_rand_vec
 import json
 import numpy as np
+
 dim = int(sys.argv[1])
 precision = int(sys.argv[2])
 n_iter = int(sys.argv[3])
@@ -13,58 +14,55 @@ n_randvecs = int(sys.argv[4])
 n_topick = int(sys.argv[5])
 threshold_perc = float(sys.argv[6])
 if len(sys.argv)<8:
-    destfile = "temp.json"
+    destfile = "dim"+str(dim)+"_prec"+str(precision)+"_iter"+str(n_iter)+"_rand"+str(n_randvecs)+"_top"+str(n_topick)+"_tresh"+str(threshold_perc).replace(".","")
 else:
     destfile = sys.argv[7]
-iteration= 0
-to_ser=[]
+destfile = "test_data/" + destfile
 
-with open(destfile,"w") as f:
+with open(destfile, "ab") as f:
     try:
-        for k in range(2):
-            
+        while True:
             mat = create_matrix(dim)
             initials = [create_rand_vec(dim) for i in range(n_randvecs)]
             real_eigvals = np.linalg.eig(mat)[0]
-            real_eigvects = np.linalg.eig(mat)[1]
-            print("NEW MATRIX: ",real_eigvals)
-            print(": ",real_eigvects)
+            real_eigvects = np.linalg.eig(mat)[1].T
+            print("REAL EIGENVALUES: ",real_eigvals)
+            print("REAL EIGENVECTORS: \n",real_eigvects)
             res = None
             for i in initials:
                 if res is None:
                     res = qpca(mat, precision, initialeig=i)
-                else: 
+                else:
                     res.merge(qpca(mat, precision, initialeig=i))
-            
+
             max_count = res.get_eigvals()[-1][1]
             threshold = max_count * threshold_perc
-            
-            
+
+
             eigvals_to_inspect = [i[0] for i in res.get_eigvals() if i[1]>threshold]
             print("OVER THRESHOLD: ",eigvals_to_inspect)
             eigvals_to_inspect=sorted(eigvals_to_inspect)
-            
+
             eigvals_to_inspect = eigvals_to_inspect[-n_topick:]
             print("SELECTED: ",eigvals_to_inspect)
-            
+            eigvalstodump = []
+            eigvectstodump = []
+            msetodump = []
             for e in eigvals_to_inspect:
                 approx = res.eigvec_from_eigval(e)[0]
                 print("USING", e)
-                eigvalstodump = []
-                eigvectstodump=[]
                 for i in range(n_iter):
                     r = qpca(mat, precision, initialeig=approx)
                     max_eigval = r.get_eigvals()[-1][0]
                     approx = r.eigvec_from_eigval(max_eigval)[0]
-                    eigvalstodump.append(max_eigval)
-                    eigvectstodump.append(np.array2string(approx))
+                eigvalstodump.append(max_eigval)
+                eigvectstodump.append(approx.tolist())
                 print("ESTIMATED: ", max_eigval, " , ", approx)
-            to_ser.append([iteration, np.array2string(real_eigvals), np.array2string(real_eigvects),eigvalstodump,eigvectstodump])
-            iteration+=1
-                
-                
-                
-                
+                # compute MSE
+                eigv_tocompare = real_eigvects[min([i for i in range(len(real_eigvals))], key= lambda x : abs(real_eigvals[x]-max_eigval))]
+                MSE1 = np.mean(np.subtract(approx, eigv_tocompare)**2)
+                MSE2 = np.mean(np.subtract(-approx, eigv_tocompare)**2)
+                msetodump.append(MSE1 if MSE1<MSE2 else MSE2)
+            pickle.dump([real_eigvals.tolist(), real_eigvects.tolist(), eigvalstodump, eigvectstodump, msetodump], f)
     except KeyboardInterrupt:
         pass
-    json.dump(to_ser,f)
