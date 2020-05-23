@@ -1,7 +1,7 @@
 import pickle
 import sys
 
-
+counter = 0
 dim = int(sys.argv[1])
 precision = int(sys.argv[2])
 n_iter = int(sys.argv[3])
@@ -18,5 +18,7 @@ with open(destfile, 'rb') as f:
     while True:
         try:
             print(pickle.load(f))
+            counter+=1
         except(EOFError):
             break
+print(counter)

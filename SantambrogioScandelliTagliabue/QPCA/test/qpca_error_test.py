@@ -4,7 +4,6 @@ sys.path.insert(1, '../modules')
 from qpca import qpca
 from test_utils import create_matrix
 from test_utils import create_rand_vec
-import json
 import numpy as np
 
 dim = int(sys.argv[1])
@@ -13,15 +12,16 @@ n_iter = int(sys.argv[3])
 n_randvecs = int(sys.argv[4])
 n_topick = int(sys.argv[5])
 threshold_perc = float(sys.argv[6])
-if len(sys.argv)<8:
+ncomplete = int(sys.argv[7])
+if len(sys.argv)<9:
     destfile = "dim"+str(dim)+"_prec"+str(precision)+"_iter"+str(n_iter)+"_rand"+str(n_randvecs)+"_top"+str(n_topick)+"_tresh"+str(threshold_perc).replace(".","")
 else:
-    destfile = sys.argv[7]
+    destfile = sys.argv[8]
 destfile = "test_data/" + destfile
 
 with open(destfile, "ab") as f:
     try:
-        while True:
+        for g in range(ncomplete):
             mat = create_matrix(dim)
             initials = [create_rand_vec(dim) for i in range(n_randvecs)]
             real_eigvals = np.linalg.eig(mat)[0]
