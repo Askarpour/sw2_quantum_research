@@ -49,6 +49,7 @@ with open(destfile, "ab") as f:
             eigvectstodump = []
             msetodump = []
             for e in eigvals_to_inspect:
+                max_eigval = e
                 approx = res.eigvec_from_eigval(e)[0]
                 print("USING", e)
                 for i in range(n_iter):
