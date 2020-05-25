@@ -34,12 +34,12 @@ for i in instances:
     mse = i[4]
     mmse+=sum(mse)
     count_mse += len(mse)
-    print("REAL: ",real_val)
-    print("FOUND: ",found_val)
+    #print("REAL: ",real_val)
+    #print("FOUND: ",found_val)
     for v in found_val:
         rval_index = min([i for i in range(len(real_val))], key= lambda x : abs(real_val[x]-v))
         
         mask[rval_index] = True
-    print(mask)
+    #print(mask)
 print(mmse/count_mse)
     
