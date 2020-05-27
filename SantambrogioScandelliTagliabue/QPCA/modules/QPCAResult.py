@@ -1,4 +1,7 @@
 from tomography import fin_eigv
+from tomography import ebin
+from tomography import rel_sign
+import numpy as np
 
 """
 Custom object to represent the results of a Quantum Principal Component Analysis experiment:
@@ -15,24 +18,40 @@ METHODS:
 - get_last: getter for the last circuit
 """
 class QPCAResult(object):
-    def __init__(self, counts_tuple, eigvec, lastcirc, psibits, nbits):
+    def __init__(self, counts, eigvec, lastcirc, psibits, nbits):
         self.psibits = psibits
         self.nbits =nbits
-        self._counts_tuple = counts_tuple
-        eigvals_dicZ = retrieve_eigvals(counts_tuple[0], psibits)
-        eigvals_dicX = retrieve_eigvals(counts_tuple[1], psibits)
+        self._counts = counts
+        eigvals_dics=[retrieve_eigvals(i, psibits) for i in counts]
         self._eigvec=eigvec
         self._lastcirc=lastcirc
-        self.eigvalcounts = {k: eigvals_dicZ.get(k, 0) + eigvals_dicX.get(k, 0) for k in set(eigvals_dicZ) | set(eigvals_dicX)}
+        self.possible_keys = set().union(*eigvals_dics)
+        self.eigvalcounts = {k: sum([i.get(k,0) for i in eigvals_dics]) for k in self.possible_keys}
     def get_eigvals(self, sort=True):
         return (sorted(self.eigvalcounts.items(), key=lambda x:x[1]) if sort else self.eigvalcounts)
     def eigvec_from_eigval(self, eigval):
-        dicsZ = retrieve_dicts(self._counts_tuple[0], self.psibits)
-        dicsX = retrieve_dicts(self._counts_tuple[1], self.psibits)
-        eigv = fin_eigv(dicsZ[eigval], dicsX[eigval], self.psibits)
+        measu = [retrieve_dicts(i, self.psibits) for i in self._counts]
+        tosubmit = [i.get(eigval,0) for i in measu]
+        eigv = estimate_vector(tosubmit, self.psibits)
         return eigv
     def get_last(self):
         return self._lastcirc
+    def merge(self, other):
+        if self.psibits!= other.psibits or self.nbits!=other.nbits:
+            raise ValueError("Invalid merge")
+        for i in other.eigvalcounts.keys():
+            if i not in self.eigvalcounts.keys():
+                self.eigvalcounts[i] = other.eigvalcounts[i]
+            else:
+                self.eigvalcounts[i] += other.eigvalcounts[i]
+        for i in range(len(self._counts)):
+            for j in other._counts[i].keys():
+                if j not in self._counts[i].keys():
+                    self._counts[i][j] = other._counts[i][j]
+                else:
+                    self._counts[i][j] += other._counts[i][j]
+        
+        
 
 """
 Utility function that converts a binary number string in a decimal number
@@ -71,3 +90,19 @@ def retrieve_dicts(counts, psibits):
             dic[a]={}
         dic[a][i[0][:psibits]] = i[1]
     return dic
+
+def estimate_vector(measurements, dim):
+    #absolute values estimation
+    for i in measurements:
+        for x in range(2**dim):
+            key = '{number:0{width}b}'.format(width=dim,number=x)
+            if key not in i.keys():
+                i[key] = 0 
+    meas = measurements[0]
+    estvect = [np.sqrt(meas.get('{number:0{width}b}'.format(width=dim,number=i))/sum(meas.values())) for i in range(2**dim)]
+    #signs 
+    for i in range(dim):
+        estvect = np.reshape(estvect,(-1,2**i))
+        estvect = rel_sign(estvect, measurements[i+1], i)
+    estvect = np.reshape(estvect,(-1,2**dim))
+    return estvect
