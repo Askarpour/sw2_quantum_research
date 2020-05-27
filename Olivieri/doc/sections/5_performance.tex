@@ -1,4 +1,4 @@
-\subsection{Performance}
+\section{Performance}
 
 To analyze the performance of quantum walks w.r.t. classical we need to define the quantum walk search problem. A more specific view of
 possible applications will be discussed at the end of this document. 
@@ -8,34 +8,30 @@ possible applications will be discussed at the end of this document.
 \subsection{The search problem}
 
 The search problem consists in find a marked vertex in a given graph by applying random walk. Given a graph G with a set of marked nodes
-we want to find a marked vertex. The main idea is that starting from a vertex n we perform a step of the random walk and then we check if
-the current vertex is marked, if not we continue repeating this procedure. We can also separate this problem in 2 versions, the detecting 
-problem that given the conditions states before, a graph and a set of marked vertex, says if there is a marked vertex, and the actual finding
-problem that given the same conditions find one marked vertex.
+we want to find a marked vertex. The main idea is that starting from a vertex n we perform steps of the random walk and measure when there is an 
+high probability of measure a marked vertex. 
 
 % efficiency
 
 \subsection{Efficiency of a QW circuit}
 
-To talk about efficiency we need some definitions, the implementation of a quantum walk circuit for a graph walk is said to be Efficient 
-if it can be build with at most O(poly(log(N))) one and two qubits where N is the number of nodes in the graph \cite{douglas2007efficient}. 
-quantum gates. An analysis of quantum walk approach w.r.t. classical is to be done for different family of graphs, since an efficient circuit
-can not be realized for all the classes of graph. The comparison between quantum and classical is made in \cite{douglas2014complexity} by 
-considering the relative number of queries to a fixed oracle needed to complete the search. Also the paper provide two definition of 
+The implementation of a quantum walk circuit for a graph walk is said to be Efficient 
+if it can be build with at most O(poly(log(N))) one and two qubits gates where N is the number of nodes in the graph \cite{douglas2007efficient}. 
+An analysis of quantum walk approach w.r.t. classical is to be done for different family of graphs, since an efficient circuit
+can not be realized for all the classes of graphs. The comparison between quantum and classical is made in \cite{douglas2014complexity} by 
+considering the relative number of queries to a fixed oracle needed to complete the search. The paper provide two definition of 
 efficiency, the first notion require the algorithm to be quadratically faster in search w.r.t. the best possible classical search and the 
-second notion is the definition of efficiency explained above. An example of interest is the hypercube, its quantum representation can
-achieve a quadratic speedup over the number of query, using a coin biased toward marked nodes. In the paper are presented also results
-for complete graphs and twisted toroids.    
+second notion require the circuit to be implementable using O(log(n)) 2-qubit gates. An example of interest is the hypercube, its quantum representation can
+achieve a quadratic speedup over the number of queries, said N the number of queries to an oracle we have $O(\sqrt{N})$ calls, using a coin biased 
+toward marked nodes. In the paper are presented also results for complete graphs and twisted toroids.    
 
 \subsection{Scalability and limitations of coined DTQW}
 
 An important aspect to consider is the implementation of the controlled NOT gate. As mentioned in the previous section this gate, 
 increasing the number of controls, require some ancillary qubits. In the family of graphs mentioned above in the analysis performed by 
-\cite{douglas2014complexity} the number of controls qubits is O(n) and the same is for the ancillary, in this case we still respect the 
-notion of efficiency declared, but for sure is an interesting parameter to consider for the scalability of these circuit. 
+\cite{douglas2014complexity} the number of controls qubits is O(log(N)) and the same is for the ancillary, in this case we still respect the 
+notion of efficiency declared, but for sure is a parameter to consider for the scalability of these circuit. 
 
 The method presented, as we just said, can be generalized to other types of graphs but unfortunately is limited to undirected graphs
 without weights, since various application require weighted and/or directed graphs we need something more generic. In the next chapter
-is showed a method that can achieve quantum walks also for undirected and weighted graphs. Before presenting this method, we need a 
-brief introduction to Markow Chain, using the Markow Chain representation of the graph we can reduce the limitations and work with 
-directed and weighted graphs.
+is showed a method that can achieve quantum walks also for undirected and weighted graphs.

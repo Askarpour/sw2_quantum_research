@@ -2,19 +2,17 @@
 
 \usepackage[utf8]{inputenc} 
 \usepackage{graphicx}
+\usepackage{subfigure}
 \usepackage{physics}
 \usepackage{amssymb}
 \usepackage{tikz}
 \usepackage{listings}
 \usepackage{xcolor}
 \usepackage[toc, page]{appendix}
+\usepackage{hyperref}
 \usetikzlibrary{quantikz}     
 
-\usepackage[
-backend=biber,
-style=alphabetic,
-sorting=ynt
-]{biblatex}
+\usepackage[style=numeric]{biblatex}
 \addbibresource{sections/references.bib}
 
 %%%%%%%% code color %%%%%%%%%%
@@ -50,15 +48,18 @@ sorting=ynt
 \date{March 2020}
 
 
+
 \begin{document}
 \pagenumbering{arabic}
 
 \twocolumn[
   \begin{@twocolumnfalse}
+
     \maketitle
     \begin{abstract}
         \input{sections/0_abstract.tex}
     \end{abstract}
+
   \end{@twocolumnfalse}
   ]
 
@@ -74,11 +75,20 @@ sorting=ynt
 \input{sections/8_conclusions.tex}
 \printbibliography[title={References}]
 
+
+\begin{appendices}
 \twocolumn[
   \begin{@twocolumnfalse}
-    \appendix
-    \input{sections/A_coined_quantum_walk.tex}
+    \clearpage
+    \input{sections/A_coined_quantum_walk.tex}    
   \end{@twocolumnfalse}
   ]
-    
+\twocolumn[
+  \begin{@twocolumnfalse}
+    \clearpage
+    \input{sections/B_szegedy_quantum_walk.tex}
+  \end{@twocolumnfalse}
+  ] 
+      
+\end{appendices}
 \end{document}
