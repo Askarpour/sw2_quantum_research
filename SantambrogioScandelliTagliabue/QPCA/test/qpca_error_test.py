@@ -4,6 +4,7 @@ sys.path.insert(1, '../modules')
 from qpca import qpca
 from test_utils import create_matrix
 from test_utils import create_rand_vec
+from test_utils import addtoevals
 import numpy as np
 
 dim = int(sys.argv[1])
@@ -41,7 +42,11 @@ with open(destfile, "ab") as f:
 
             eigvals_to_inspect = [i[0] for i in res.get_eigvals() if i[1]>threshold]
             print("OVER THRESHOLD: ",eigvals_to_inspect)
-            eigvals_to_inspect=sorted(eigvals_to_inspect)
+            evals=[]
+            for i in eigvals_to_inspect:
+                addtoevals(evals, i, precision)
+            print("MERGED: ", evals)
+            eigvals_to_inspect=sorted(evals)
 
             eigvals_to_inspect = eigvals_to_inspect[-n_topick:]
             print("SELECTED: ",eigvals_to_inspect)
