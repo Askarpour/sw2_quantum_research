@@ -6,6 +6,7 @@ doc/doc.synctex.gz
 doc/doc.bbl
 doc/doc.bcf
 doc/doc.blg
+doc/doc.out
 doc/doc.run.xml
 doc/quantikz.tex
 doc/doc.fdb_latexmk
@@ -17,3 +18,7 @@ presentation/presentation.aux
 presentation/presentation.nav
 presentation/presentation.snm
 presentation/presentation.toc
+presentation/presentation.fdb_latexmk
+presentation/presentation.synctex.gz
+presentation/presentation.fls
+

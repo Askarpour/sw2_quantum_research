@@ -1,9 +1,8 @@
 \section{Coined Quantum walk}
-This code below is referred to coined quantum walk, using Hadamard coin for a
-cycle graph with number of nodes N=3.
-\enlargethispage{\baselineskip}
+This code below is referred to coined quantum walk, using Hadamard coin on a
+cycle graph with number of nodes N=8.
 
-\begin{lstlisting}[breaklines,language=Python]
+\begin{lstlisting}[breaklines,language=Python,basicstyle=\tiny]
 from qiskit import *
 
 #increment operator for a 3-bit state register
@@ -51,6 +50,7 @@ def random_walk(steps, circuit):
     for i in range(0, steps):
         random_walk_step(circuit)
     return circuit  
-
 \end{lstlisting}
-%\lstinputlisting[breaklines,breakatwhitespace,caption=inputenc,language=Python]{code/coined_quantum_walk.py}
+
+\clearpage
+

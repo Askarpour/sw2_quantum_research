@@ -2,7 +2,7 @@
 
 The following example shows how to implement a Coined discrete quantum walk on a cyclic graph with N = 8 nodes. This can be achieved using the coined DQW on a line
 where the line is the cylic graph. First we need to encode the graph nodes in a binary notation to fit with qubits. In general a graph with $2^{n}$ nodes needs n encoding 
-bit, in our case since we have $2^{3}$ nodes we can use 3 bit to encode. The Figure 1 below shows how we can bind the qubits to the nodes of the graph.
+bit, in our case since we have $2^{3}$ nodes we can use 3 encoding bit. The Figure 1 below shows how we can bind the qubits to the nodes of the graph.
 
 \begin{figure}[h!]
     \includegraphics[scale=0.3]{img/cyclic_graph.png}
@@ -15,22 +15,23 @@ bit, in our case since we have $2^{3}$ nodes we can use 3 bit to encode. The Fig
 We can fit now the 3 main components mentioned in the previous section for this specific example. 
 
 % walker
-Starting from the \textbf{walker operator}: for this version we need to encode the nodes of the graph in 3 qubits, usually we need log(N) qubits, in general this is not always true, 
-we will see why in the next section. Using 3 qubits the postion of the walker is given by the binary encoding of the node, for instance the node 0 is represented as $\ket{000}$.
+Starting from the \textbf{walker operator}: for this version we need to encode the nodes of the graph in 3 qubits, the position of the walker 
+is given by the binary encoding of the node, for instance the node 0 is represented as $\ket{000}$.
 
 % coin operator
-For the \textbf{coin operator} operator, we will use an Hadamard coin, that
+For the \textbf{coin operator}, we will use an Hadamard coin, that
 consists in apply the Hadamard operator to the system. 
 
 % hadamard coin description
 
 % shift operator
-The \textbf{shift operator} operator in this case will move the actual position that we call $\ket{i}$ to one of the adjiacent nodes, that corresponds to 
+The \textbf{shift operator} operator in this case will move the actual position that we call $\ket{i}$ to one of the adjacent nodes, that corresponds to 
 $\ket{i+1}$ or $\ket{i-1}$, which is decided by the outcome of the coin operator.
 
 \subsection{Circuit for the CQW}
 
-To implement the circuit in qiskit we need to translate the operator defined in quantum circuits, first we need 1 qubit for the coin and 3 for the position. 
+To implement the circuit in qiskit we need to translate the operators defined in quantum circuits, first we need 1 qubit for the coin and 3 for the position, we need log(N) qubits
+but for encoding larger number we may need more qubits as support for the multi toffoli gates, we will see why in the next section.
 The Hadamard can be easily implemented using an Hadamard gate on the first qubit. Then we need a circuit to perform an increment and a decrement on the initial state, 
 this is less trivial and to achieve that we need two sub circuit that uses multi controlled toffoli gates. The circuit below represents an incrementer circuit 
 for 3 qubits.
@@ -50,7 +51,7 @@ The decrement circuit is similar but uses negative controlled not gates, the cir
 \end{quantikz}
 
 The negative controlled not can be represented by negate before and after the controlled not, the equivalence circuit below
-clarify this explanation, for a detalied explanation look at \cite{nielsen_chuang_2010}.
+clarify this explanation, this circuit equivalence came from \cite{nielsen_chuang_2010} which provide other equivalence to build quantum circuits.
 
 $$
 \begin{quantikz}[baseline={($(W.base)!.5!(W2.base) -height("$\vcenter{}$")*(0,1pt)$)}]
@@ -71,15 +72,18 @@ Finally the decrement circuit defined above, using this equivalence, is showed b
     & \ket{0} & \targ{} & \targ{}  & \qw      & \qw     & \targ{} & \qw \\
 \end{quantikz}
 
-A similar implementation in detail is covered in \cite{douglas2007efficient}.
-The final circuit by combining all the components defined is showed below.
+To implement the circuit I started with \cite{douglas2007efficient} I didn't know how to build the the negative controlled not before finding that equivalence and \cite{garcía2007high} helped me. 
+The circuit above are displayed thanks to the latex package \cite{kay2018tutorial}.
+The final circuit is obtained by combining all the components defined and is showed below in Fig.2.
 
-\begin{quantikz}
-    &\lstick{$\ket{0}$\\coin} & \ctrl{3} & \ctrl{2} & \ctrl{1}& \qw  & \targ{} & \ctrl{3} & \ctrl{2} & \ctrl{1} & \targ{} & \qw \\
-    & \ket{0} & \ctrl{2} & \ctrl{1} & \targ{} & \qw  & \targ{} & \ctrl{2} & \ctrl{1} & \targ{}  & \targ{} & \qw \\
-    & \ket{0} & \ctrl{1} & \targ{}  & \qw     & \qw  & \targ{} & \ctrl{1} & \targ{}  & \qw      & \targ{} & \qw \\
-    & \ket{0} & \targ{}  & \qw      & \qw     & \qw  & \targ{} & \targ{}  & \qw      & \qw      & \targ{} & \qw \\
-\end{quantikz}
+\begin{figure}[h!]
+    \includegraphics[scale=0.5]{img/cqw.jpg}
+    \caption{Complete circuit for the coined quantum walk on a cyclic graph with N=8 nodes}
+    \centering
+\end{figure}
+
+\href{https://algassert.com/quirk#circuit={%22cols%22:[[1,1,1,%22H%22],[1,1,%22X%22,%22%E2%80%A2%22],[1,%22X%22,%22%E2%80%A2%22,%22%E2%80%A2%22],[%22X%22,%22%E2%80%A2%22,%22%E2%80%A2%22,%22%E2%80%A2%22],[%22X%22,%22X%22,%22X%22,%22X%22],[1,1,%22X%22,%22%E2%80%A2%22],[1,%22X%22,%22%E2%80%A2%22,%22%E2%80%A2%22],[%22X%22,%22%E2%80%A2%22,%22%E2%80%A2%22,%22%E2%80%A2%22],[%22X%22,%22X%22,%22X%22,%22X%22],[%22Chance3%22]]}}{Click here for a Quirk Simulation}
+that shows one step of the circuit above, the subcircuit are upside down since Quirk uses a litte-endian convention.
 
 It's worth to make some comments about it, this circuit represents the U operator, in fact the Hadamard coin will 
 randomly choose the direction to take and activate the increment or decrement sub circuit. Therefore this corresponds
