@@ -15,3 +15,15 @@ def create_matrix(dim):
 
 def create_rand_vec(dim):
     return  np.random.rand(dim)*2 - 1
+
+def addtoevals(vec, i, prec):
+    toremove=[]
+    toadd = i
+    for j in vec:
+        if abs(toadd-j)<=1.01*(1/2**(prec)):
+            toremove.append(j)
+    for j in toremove:
+        vec.remove(j)
+    vec.append(toadd)
+            
+    
