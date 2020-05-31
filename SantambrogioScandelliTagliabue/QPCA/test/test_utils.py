@@ -13,6 +13,13 @@ def create_matrix(dim):
     covmat=covmat/np.trace(covmat)
     return covmat
 
+def create_cus_matrix(dim, k):
+    w = np.random.randn(dim, k)
+    s = w.dot(w.T)
+    d = np.diag(np.random.rand(dim))
+    s = np.add(s,d)
+    return s/np.trace(s)
+
 def create_rand_vec(dim):
     return  np.random.rand(dim)*2 - 1
 
@@ -26,4 +33,5 @@ def addtoevals(vec, i, prec):
         vec.remove(j)
     vec.append(toadd)
             
-    
+
+print(create_cus_matrix(4,2))

@@ -3,7 +3,7 @@ import pickle
 def check(inst):
     real_val=inst[0]
     #print(sorted(real_val), sum(sorted(real_val)[-2:]))
-    return sum(sorted(real_val)[-2:])>0.63
+    return sum(sorted(real_val)[-2:])>0
         
 
 def filemetrics(dim, precision, n_iter, n_randvecs, n_topick, threshold_perc, destfile=None, limit=500):
