@@ -50,8 +50,8 @@ class QPCAResult(object):
                     self._counts[i][j] = other._counts[i][j]
                 else:
                     self._counts[i][j] += other._counts[i][j]
-        
-        
+
+
 
 """
 Utility function that converts a binary number string in a decimal number
@@ -64,7 +64,7 @@ def bin_to_dec(binary):
     return dec
 
 """
-Function that is used to parse counts obtained from measurements of the runs of the quantum circuit, 
+Function that is used to parse counts obtained from measurements of the runs of the quantum circuit,
 it creates a dictionary that for each eigenvalue found, specifies how many times has found it
 """
 def retrieve_eigvals(counts, psibits):
@@ -73,12 +73,12 @@ def retrieve_eigvals(counts, psibits):
         substring = bin_to_dec(i[0][psibits:])
         if substring not in occurrence.keys():
             occurrence[substring] = i[1]
-        else: 
+        else:
             occurrence[substring] += i[1]
     return occurrence
 
 """
-Function that is used to parse counts obtained from measurements of the runs of the quantum circuit, 
+Function that is used to parse counts obtained from measurements of the runs of the quantum circuit,
 it creates a dictionary that for each eigenvalue found, it creates a dictionary that specifies for each combination of
 psibis(encoding of eigenvector) how many times they have been found as result of the experiment
 """
@@ -97,10 +97,10 @@ def estimate_vector(measurements, dim):
         for x in range(2**dim):
             key = '{number:0{width}b}'.format(width=dim,number=x)
             if key not in i.keys():
-                i[key] = 0 
+                i[key] = 0
     meas = measurements[0]
     estvect = [np.sqrt(meas.get('{number:0{width}b}'.format(width=dim,number=i))/sum(meas.values())) for i in range(2**dim)]
-    #signs 
+    #signs
     for i in range(dim):
         estvect = np.reshape(estvect,(-1,2**i))
         estvect = rel_sign(estvect, measurements[i+1], i)
