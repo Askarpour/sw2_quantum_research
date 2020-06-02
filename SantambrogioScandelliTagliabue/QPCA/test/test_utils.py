@@ -4,8 +4,8 @@ import scipy
 def create_matrix(dim):
     data = scipy.random.rand(10,dim)*20
     means = np.mean(data,axis=0)
-    u=np.ones(len(data))[None] 
-    u=u.reshape((len(data),1)) 
+    u=np.ones(len(data))[None]
+    u=u.reshape((len(data),1))
     means=means.reshape((len(data[0]),1))
     centered = data-np.dot(u,means.T)
 
@@ -32,6 +32,3 @@ def addtoevals(vec, i, prec):
     for j in toremove:
         vec.remove(j)
     vec.append(toadd)
-            
-
-print(create_cus_matrix(4,2))
