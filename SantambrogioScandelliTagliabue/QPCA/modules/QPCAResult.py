@@ -18,12 +18,11 @@ METHODS:
 - get_last: getter for the last circuit
 """
 class QPCAResult(object):
-    def __init__(self, counts, eigvec, lastcirc, psibits, nbits):
+    def __init__(self, counts, lastcirc, psibits, nbits):
         self.psibits = psibits
         self.nbits =nbits
         self._counts = counts
         eigvals_dics=[retrieve_eigvals(i, psibits) for i in counts]
-        self._eigvec=eigvec
         self._lastcirc=lastcirc
         self.possible_keys = set().union(*eigvals_dics)
         self.eigvalcounts = {k: sum([i.get(k,0) for i in eigvals_dics]) for k in self.possible_keys}

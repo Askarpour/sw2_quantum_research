@@ -17,7 +17,7 @@ from qiskit.aqua.utils.controlled_circuit import get_controlled_circuit
 from tomography import fin_eigv
 
 """
-Checks if the matrix is valid, adds rows and columns in order to make it of 2**i length, return n° of bits required to encode it, 
+Checks if the matrix is valid, adds rows and columns in order to make it of 2**i length, return n° of bits required to encode it,
 it also proceeds to exponentiate the matrix, in order to make it unitary
 """
 def preprocess_mat(matrix):
@@ -35,14 +35,14 @@ def preprocess_mat(matrix):
 Used to specify an initial approximation of the eigenvector for the quantum phase estimation
 """
 def generatefirst(psibits, realdim, ie):
-    last_approx=[0]*2**psibits
+    initial=[0]*2**psibits
     if np.all(ie):
         for i in range(len(ie)):
-            last_approx[i]=ie[i]
+            initial[i]=ie[i]
     else:
         for i in range(realdim):
-            last_approx[i] = 1
-    return last_approx / np.linalg.norm(last_approx)
+            initial[i] = 1
+    return initial / np.linalg.norm(initial)
 
 """
 Used to generate a controlled gate from a unitary matrix
@@ -53,7 +53,7 @@ def generate_cu3(unitary):
         for j in range(len(op)//2, len(op)):
             op[i,j] = unitary[i-len(op)//2,j-len(op)//2]
     return Operator(op)
-    
+
 """
 Creates the actual circuit for quantum phase estimation:
 PARAMETERS
@@ -75,7 +75,7 @@ def generate_circuit(initial, covmat, NBITS, PSIBITS, basevec):
         for j in range(2**i):
             q = [qubits[k] for k in range(NBITS, NBITS+PSIBITS)] + [qubits[NBITS-i-1]]
             circuit.unitary(cu3,q,label="rotation")
-    circuit.barrier()        
+    circuit.barrier()
     #inverse QFT:
     for i in range(NBITS):
         circuit.h(i)
@@ -102,25 +102,21 @@ PARAMETERS
 - simulator: a qiskit simulator, can be also a real quantum computer
 - req_shots: the number of runs of the quantum circuit to be performed
 """
-def qpca(covmat, NBITS, initialeig = None, iterations=1, simulator=BasicAer.get_backend('qasm_simulator'), req_shots=8192):
-    iteration=0
+def qpca(covmat, NBITS, initialeig = None, simulator=BasicAer.get_backend('qasm_simulator'), req_shots=8192):
     REALDIM=len(covmat)
     covmat, PSIBITS = preprocess_mat(covmat)
-    last_approx = generatefirst(PSIBITS, REALDIM, initialeig)
-    while(iteration<iterations):
-        #Generate the first circuit that measures on z basis
-        counts = []
-        circuit = generate_circuit(last_approx, covmat, NBITS, PSIBITS, "z"*(PSIBITS+NBITS))
+    initialeig = generatefirst(PSIBITS, REALDIM, initialeig)
+    #Generate the first circuit that measures on z basis
+    counts = []
+    circuit = generate_circuit(initialeig, covmat, NBITS, PSIBITS, "z"*(PSIBITS+NBITS))
+    job = execute(circuit, simulator, shots=req_shots//PSIBITS)
+    res = job.result().get_counts()
+    counts.append(res)
+    #Generate circuits that measure relative phases
+    for i in range(PSIBITS):
+        mask = "z"*(NBITS+i)+"x"+"z"*(PSIBITS-i-1)
+        circuit = generate_circuit(initialeig, covmat, NBITS, PSIBITS, mask)
         job = execute(circuit, simulator, shots=req_shots//PSIBITS)
         res = job.result().get_counts()
         counts.append(res)
-        for i in range(PSIBITS):
-            mask = "z"*(NBITS+i)+"x"+"z"*(PSIBITS-i-1)
-            circuit = generate_circuit(last_approx, covmat, NBITS, PSIBITS, mask)
-            job = execute(circuit, simulator, shots=req_shots//PSIBITS)
-            res = job.result().get_counts()
-            counts.append(res)
-        #TODO: last_approx = fin_eigv(countsZ, countsX, PSIBITS)
-        iteration+=1
-    return QPCAResult(counts, np.array(last_approx), circuit, PSIBITS, NBITS)
-
+    return QPCAResult(counts, circuit, PSIBITS, NBITS)
