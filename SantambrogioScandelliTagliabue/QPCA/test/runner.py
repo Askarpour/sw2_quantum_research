@@ -1,5 +1,5 @@
 import os
 import numpy as np
 
-for j in range(4,8):
-    os.system('python qpca_error_test.py 4 '+str(j)+' 0 4 4 0.14 500')
+for j in range(4,5,2):
+    os.system('python qpca_tester.py 16 9 0 '+str(j))
