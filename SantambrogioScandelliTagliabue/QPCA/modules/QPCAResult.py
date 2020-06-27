@@ -104,4 +104,4 @@ def estimate_vector(measurements, dim):
         estvect = np.reshape(estvect,(-1,2**i))
         estvect = rel_sign(estvect, measurements[i+1], i)
     estvect = np.reshape(estvect,(-1,2**dim))
-    return estvect
+    return estvect[0]

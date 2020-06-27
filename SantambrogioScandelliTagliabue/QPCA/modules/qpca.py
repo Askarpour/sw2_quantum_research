@@ -96,27 +96,28 @@ def generate_circuit(initial, covmat, NBITS, PSIBITS, basevec):
 The wrapper function used to handle multiple iterations of the quantum phase estimation algorithm:
 PARAMETERS
 - covmat: the matrix to eigendecompose of dimensions NxN
-- NBITS: the number of bits used to estimate the eigenvalue
+- precision: the number of bits used to estimate the eigenvalue
 - initialeig: vector of dimension N initial approximation of an eigenvector of the matrix
 - iterations: the number of iterations of the algorithm to be performed
 - simulator: a qiskit simulator, can be also a real quantum computer
 - req_shots: the number of runs of the quantum circuit to be performed
 """
-def qpca(covmat, NBITS, initialeig = None, simulator=BasicAer.get_backend('qasm_simulator'), req_shots=8192):
+def qpca(covmat, precision, initial = None, backend=BasicAer.get_backend('qasm_simulator'), req_shots=8192):
+    NBITS = precision
     REALDIM=len(covmat)
     covmat, PSIBITS = preprocess_mat(covmat)
-    initialeig = generatefirst(PSIBITS, REALDIM, initialeig)
+    initial = generatefirst(PSIBITS, REALDIM, initial)
     #Generate the first circuit that measures on z basis
     counts = []
-    circuit = generate_circuit(initialeig, covmat, NBITS, PSIBITS, "z"*(PSIBITS+NBITS))
-    job = execute(circuit, simulator, shots=req_shots//PSIBITS)
+    circuit = generate_circuit(initial, covmat, NBITS, PSIBITS, "z"*(PSIBITS+NBITS))
+    job = execute(circuit, backend, shots=req_shots//PSIBITS)
     res = job.result().get_counts()
     counts.append(res)
     #Generate circuits that measure relative phases
     for i in range(PSIBITS):
         mask = "z"*(NBITS+i)+"x"+"z"*(PSIBITS-i-1)
-        circuit = generate_circuit(initialeig, covmat, NBITS, PSIBITS, mask)
-        job = execute(circuit, simulator, shots=req_shots//PSIBITS)
+        circuit = generate_circuit(initial, covmat, NBITS, PSIBITS, mask)
+        job = execute(circuit, backend, shots=req_shots//PSIBITS)
         res = job.result().get_counts()
         counts.append(res)
     return QPCAResult(counts, circuit, PSIBITS, NBITS)
