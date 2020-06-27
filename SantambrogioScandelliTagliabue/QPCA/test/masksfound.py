@@ -1,3 +1,4 @@
+import numpy as np
 import pickle
 
 def check(inst):
@@ -48,4 +49,60 @@ def filemetrics(dim, precision, n_iter, n_randvecs, n_topick, threshold_perc, de
         print(mask,lenmask)
     return (mmse/count_mse,mmasklen/limit)
 
-print(filemetrics(4,6,3,4,4,0.15))
+def compute_mask_metric(mask):
+    lenmask = 0
+    for i in range(len(mask)-1,-1,-1):
+        if mask[i]:
+            lenmask+=1
+        else:
+            break
+    return lenmask
+
+def comp_mse(real,approx):
+    MSE1 = np.mean(np.subtract(real, approx)**2)
+    MSE2 = np.mean(np.subtract(-real, approx)**2)
+    return MSE1 if MSE1<MSE2 else MSE2
+
+def filemetrics_fix(dim, precision, n_iter, n_randvecs, destfile=None):
+    if destfile is None:
+        destfile = "dim"+str(dim)+"_prec"+str(precision)+"_iter"+str(n_iter)+"_rand"+str(n_randvecs)
+    destfile = "test_data/" + destfile
+    instances = []
+    with open(destfile, 'rb') as f:
+        while True:
+            try:
+                inst=pickle.load(f)
+                if check(inst):
+                    instances.append(inst)
+            except(EOFError):
+                break
+    #print(instances[0])
+    
+    mmse = [0]*(n_iter+1)
+    mmasklen = [0]*(n_iter+1)
+    for i in instances:
+        real_val = i[0]
+        for j in range(n_iter+1):
+            mse = 0
+            count_mse= 0
+            mask = [False]*len(real_val)
+            found_vals = [k[j] for k in i[2]]
+            #print("AT ITER "+str(j)+" FOUND ", found_vals)
+            for v in range(len(found_vals)):
+                #v index of found eig, rval_index index of real eig
+                real_val_index = min([i for i in range(len(real_val))], key= lambda x : abs(sorted(real_val)[x]-found_vals[v]))
+                real_vec_index = min([i for i in range(len(real_val))], key= lambda x : abs(real_val[x]-found_vals[v]))
+                mask[real_val_index] = True
+                real_vec = i[1][real_vec_index]
+                found_vec = i[3][v][j]
+                #print("realvec: ",real_vec," found: ", found_vec) 
+                mse += comp_mse(real_vec, found_vec)
+                count_mse+=1
+            lenmask = compute_mask_metric(mask)
+            mmse[j]+=mse/count_mse
+            mmasklen[j]+=lenmask
+            #print(mmse,mmasklen)
+    print(destfile, mmse, len(instances), mmasklen)
+    return (np.array(mmse)/len(instances), np.array(mmasklen)/len(instances))
+
+#print(filemetrics_fix(4,7,2,2))

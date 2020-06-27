@@ -1,18 +1,27 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from masksfound import filemetrics
+from masksfound import filemetrics_fix
 
 result = []
-DIM=4
-NBITS=8
-ITERATIONS=0
-RANDVECTS=4
-THRESHOLD=0.14
+DIM=16
+NBITS=7
+ITERATIONS=2
 
-for i in np.arange(4,8):
-    result.append(filemetrics(DIM,i,ITERATIONS,RANDVECTS,DIM,THRESHOLD))
+
+ra2 = [1,2,4,6,8,10]
+
+
+
+for i in range(1,11):
+    if i in ra2:
+        result.append(filemetrics_fix(DIM,NBITS,2,i))
+
+    
 print(result)
-plt.xlabel("NBITS")
-plt.ylabel("Mask Metric")
-plt.title("Dimension: "+str(DIM)+" Iterations: "+str(ITERATIONS)+" Random vectors: "+str(RANDVECTS))
-plt.plot(np.arange(4,8),[i[1] for i in result])
+
+plt.figure(0)
+plt.title("Mask/randvects "+str(DIM)+"x"+str(DIM))
+
+plt.plot( ra2, [i[1][0] for i in result])
+        
+
