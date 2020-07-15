@@ -18,4 +18,6 @@ Quantum gates: https://qiskit.org/textbook/ch-gates/quantum-gates.html
 
 Latex file: https://www.overleaf.com/read/fqnqvhtbmnbq
 
+Latex file relation: https://www.overleaf.com/read/qywymqgtdcbt
+
 
