@@ -4,8 +4,15 @@ import random
 sys.path.insert(1, '../modules')
 from qpca import qpca
 from test_utils import create_rand_vec
-from test_utils import addtoevals
 import numpy as np
+from qiskit import IBMQ, Aer
+from qiskit.visualization import plot_histogram
+import matplotlib.pyplot as plt
+IBMQ.save_account('a4cafd7af86fa3201e4308125da261daf2873395617f7337cbf274afb0f4be6492bc30c08fba1693395155dd60f27d961e70a4f0670b9cdf30d0be72b4dd9cad')
+
+IBMQ.load_account()
+provider=IBMQ.get_provider(hub='ibm-q', group='open', project='main')
+
 
 dim = int(sys.argv[1])
 precision = int(sys.argv[2])
@@ -29,12 +36,17 @@ with open(sourcefile, "rb") as f:
             break
         covmats.append(o)
 
-random.shuffle(covmats)
-covmats = covmats[:500]
+#random.shuffle(covmats)
+
+covmats = [covmats[0]]
+#sim= Aer.get_backend('qasm_simulator')#
+sim = provider.get_backend('ibmq_vigo')
+
 
 with open(destfile, "ab") as f:
     for mat in covmats:
         initials = [create_rand_vec(dim) for i in range(n_randvecs)]
+        
         real_eigvals = np.linalg.eig(mat)[0]
         real_eigvects = np.linalg.eig(mat)[1].T
         print("REAL EIGENVALUES: ",real_eigvals)
@@ -42,20 +54,27 @@ with open(destfile, "ab") as f:
         res = None
         for i in initials:
             if res is None:
-                res = qpca(mat, precision, initialeig=i)
+                res = qpca(mat, precision, initial=i, backend = sim)
             else:
-                res.merge(qpca(mat, precision, initialeig=i))
-
+                res.merge(qpca(mat, precision, initial=i, backend = sim))
+        
+        x = [i[0] for i in res.get_eigvals()]
+        heights = [i[1] for i in res.get_eigvals()]
+        
+        plt.bar(x, heights,width=0.1)
+        
+        plt.show()
+        
         max_count = res.get_eigvals()[-1][1]
         threshold = max_count * threshold_perc
 
-        eigvals_to_inspect = [i[0] for i in res.get_eigvals() if i[1]>threshold]
-        print("OVER THRESHOLD: ",eigvals_to_inspect)
-        evals=[]
-        for i in eigvals_to_inspect:
-            addtoevals(evals, i, precision)
-        print("MERGED: ", evals)
-        eigvals_to_inspect=sorted(evals)
+        # eigvals_to_inspect = [i[0] for i in res.get_eigvals() if i[1]>threshold]
+        # print("OVER THRESHOLD: ",eigvals_to_inspect)
+        # evals=[]
+        # for i in eigvals_to_inspect:
+        #     addtoevals(evals, i, precision)
+        # print("MERGED: ", evals)
+        eigvals_to_inspect=sorted([i[0] for i in res.get_eigvals() if i[1]>threshold])
         print("SELECTED: ",eigvals_to_inspect)
         eigvalstodump = []
         eigvectstodump = []
@@ -66,7 +85,7 @@ with open(destfile, "ab") as f:
             mse = []
             print("USING", e)
             for i in range(n_iter):
-                r = qpca(mat, precision, initialeig=approx[-1])
+                r = qpca(mat, precision, initial=approx[-1],backend = sim)
                 max_eigval.append(r.get_eigvals()[-1][0])
                 approx.append(r.eigvec_from_eigval(max_eigval[-1])[0])
                 print("ESTIMATED: ", max_eigval[-1], " , ", approx[-1])
@@ -78,4 +97,4 @@ with open(destfile, "ab") as f:
             eigvalstodump.append(max_eigval)
             eigvectstodump.append(approx)
             msetodump.append(mse)
-        pickle.dump([real_eigvals, real_eigvects, eigvalstodump, eigvectstodump, msetodump], f)
+        print("results: ",[real_eigvals, real_eigvects, eigvalstodump, eigvectstodump, msetodump], f)

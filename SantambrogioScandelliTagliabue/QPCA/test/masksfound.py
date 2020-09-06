@@ -76,7 +76,7 @@ def filemetrics_fix(dim, precision, n_iter, n_randvecs, destfile=None):
                     instances.append(inst)
             except(EOFError):
                 break
-    #print(instances[0])
+    print(instances[0])
     
     mmse = [0]*(n_iter+1)
     mmasklen = [0]*(n_iter+1)
@@ -87,7 +87,7 @@ def filemetrics_fix(dim, precision, n_iter, n_randvecs, destfile=None):
             count_mse= 0
             mask = [False]*len(real_val)
             found_vals = [k[j] for k in i[2]]
-            #print("AT ITER "+str(j)+" FOUND ", found_vals)
+            print("AT ITER "+str(j)+" FOUND ", found_vals)
             for v in range(len(found_vals)):
                 #v index of found eig, rval_index index of real eig
                 real_val_index = min([i for i in range(len(real_val))], key= lambda x : abs(sorted(real_val)[x]-found_vals[v]))
@@ -95,13 +95,13 @@ def filemetrics_fix(dim, precision, n_iter, n_randvecs, destfile=None):
                 mask[real_val_index] = True
                 real_vec = i[1][real_vec_index]
                 found_vec = i[3][v][j]
-                #print("realvec: ",real_vec," found: ", found_vec) 
+                print("realvec: ",real_vec," found: ", found_vec) 
                 mse += comp_mse(real_vec, found_vec)
                 count_mse+=1
             lenmask = compute_mask_metric(mask)
             mmse[j]+=mse/count_mse
             mmasklen[j]+=lenmask
-            #print(mmse,mmasklen)
+            print(mmse,mmasklen)
     print(destfile, mmse, len(instances), mmasklen)
     return (np.array(mmse)/len(instances), np.array(mmasklen)/len(instances))
 

@@ -3,25 +3,22 @@ import matplotlib.pyplot as plt
 from masksfound import filemetrics_fix
 
 result = []
-DIM=16
-NBITS=7
-ITERATIONS=2
-
-
-ra2 = [1,2,4,6,8,10]
+dims = [2,4,8]
+nbits = 7
+iters = 2
+randv = 8
 
 
 
-for i in range(1,11):
-    if i in ra2:
-        result.append(filemetrics_fix(DIM,NBITS,2,i))
+for i in dims:
+    result.append(filemetrics_fix(i,nbits,iters,randv))
 
     
-print(result)
+print("result: ",result)
 
 plt.figure(0)
-plt.title("Mask/randvects "+str(DIM)+"x"+str(DIM))
+plt.title("MSE with respect to the dimension of the matrix")
 
-plt.plot( ra2, [i[1][0] for i in result])
+plt.plot( dims, [i[0][0] for i in result])
         
 
