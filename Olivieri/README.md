@@ -5,7 +5,7 @@ This folder contains the project on quantum computing and is organized as follow
 
 *doc*: contains the final document about the project, written in Latex
 *papers*: contains the reference papers used for this projects
-*rc*: contains the code in python
+*src*: contains the code in python
 
 # Research Question:
 In this research project i want to know more about quantum walks, the quantum version of the random walks,

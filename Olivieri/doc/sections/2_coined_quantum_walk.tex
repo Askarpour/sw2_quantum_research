@@ -1,7 +1,7 @@
 \section{Coined Quantum Walk}
 
 The following example shows how to implement a Coined discrete quantum walk on a cyclic graph with N = 8 nodes. This can be achieved using the coined DQW on a line
-where the line is the cylic graph. First we need to encode the graph nodes in a binary notation to fit with qubits. In general a graph with $2^{n}$ nodes needs n encoding 
+where the line is the cyclic graph. First we need to encode the graph nodes in a binary notation to fit with qubits. In general a graph with $2^{n}$ nodes needs n encoding 
 bit, in our case since we have $2^{3}$ nodes we can use 3 encoding bit. The Figure 1 below shows how we can bind the qubits to the nodes of the graph.
 
 \begin{figure}[h!]
@@ -31,9 +31,9 @@ $\ket{i+1}$ or $\ket{i-1}$, which is decided by the outcome of the coin operator
 \subsection{Circuit for the CQW}
 
 To implement the circuit in qiskit we need to translate the operators defined in quantum circuits, first we need 1 qubit for the coin and 3 for the position, we need log(N) qubits
-but for encoding larger number we may need more qubits as support for the multi toffoli gates, we will see why in the next section.
+but for encoding larger number we may need more qubits as support for the multi Toffoli gates, we will see why in the next section.
 The Hadamard can be easily implemented using an Hadamard gate on the first qubit. Then we need a circuit to perform an increment and a decrement on the initial state, 
-this is less trivial and to achieve that we need two sub circuit that uses multi controlled toffoli gates. The circuit below represents an incrementer circuit 
+this is less trivial and to achieve that we need two sub circuit that uses multi controlled Toffoli gates. The circuit below represents an incrementer circuit 
 for 3 qubits.
 
 \begin{quantikz}
@@ -72,7 +72,7 @@ Finally the decrement circuit defined above, using this equivalence, is showed b
     & \ket{0} & \targ{} & \targ{}  & \qw      & \qw     & \targ{} & \qw \\
 \end{quantikz}
 
-To implement the circuit I started with \cite{douglas2007efficient} I didn't know how to build the the negative controlled not before finding that equivalence and \cite{garcía2007high} helped me. 
+To implement the circuit I started with \cite{douglas2007efficient} I didn't know how to build the the negative controlled not before finding that equivalence and \cite{garcia2007high} helped me. 
 The circuit above are displayed thanks to the latex package \cite{kay2018tutorial}.
 The final circuit is obtained by combining all the components defined and is showed below in Fig.2.
 
@@ -82,8 +82,8 @@ The final circuit is obtained by combining all the components defined and is sho
     \centering
 \end{figure}
 
-\href{https://algassert.com/quirk#circuit={%22cols%22:[[1,1,1,%22H%22],[1,1,%22X%22,%22%E2%80%A2%22],[1,%22X%22,%22%E2%80%A2%22,%22%E2%80%A2%22],[%22X%22,%22%E2%80%A2%22,%22%E2%80%A2%22,%22%E2%80%A2%22],[%22X%22,%22X%22,%22X%22,%22X%22],[1,1,%22X%22,%22%E2%80%A2%22],[1,%22X%22,%22%E2%80%A2%22,%22%E2%80%A2%22],[%22X%22,%22%E2%80%A2%22,%22%E2%80%A2%22,%22%E2%80%A2%22],[%22X%22,%22X%22,%22X%22,%22X%22],[%22Chance3%22]]}}{Click here for a Quirk Simulation}
-that shows one step of the circuit above, the subcircuit are upside down since Quirk uses a litte-endian convention.
+\href{https://bit.ly/33mno2U}{Click here for a Quirk Simulation}
+that shows one step of the circuit above, the sub-circuit are upside down since Quirk uses a little-endian convention.
 
 It's worth to make some comments about it, this circuit represents the U operator, in fact the Hadamard coin will 
 randomly choose the direction to take and activate the increment or decrement sub circuit. Therefore this corresponds

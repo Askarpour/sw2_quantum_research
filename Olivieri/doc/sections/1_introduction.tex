@@ -1,34 +1,47 @@
 \section{Introduction}
+
+\subsection{Acronyms}
+
+\begin{table}[h!]
+\begin{tabular}{ll}
+Acronym & Extended              \\
+\hline
+QW      & Quantum Walk          \\
+DQWL    & Discrete QW on a Line \\
+DTQW    & Discrete Time QW     
+\end{tabular}
+\end{table}
+
 \subsection{Random Walks}
 
 % random walk definition
-A random walk, also known as a stochastic or random process, is a mathematical object which describe a path constitued by random step over a mathematical space. A common 
+A random walk, also known as a stochastic or random process, is a mathematical object which describe a path constituted by random step over a mathematical space. A common 
 example is a random walk in a line. Consider the integer set Z, starting from a certain point, for instance x = 0, the path is defined by randomly choose to move left or 
 right, the movement is achieved increasing or decreasing the value of x by 1. Tossing a coin will help in choosing randomly, with equal probability, the next step to take. 
 This example could be generalized by increasing the dimension of the mathematical space considered, in a cartesian plane the starting point will have two  
 coordinates and the possible moves becomes 4, and there are many other possible generalizations.
 
-%random walk discrete and continous
-Random walks can be divided in two major classes, discrete-time and continous-time random walk. Intuitively as the names suggest the difference between this two class 
+%random walk discrete and continuous
+Random walks can be divided in two major classes, discrete-time and continuous-time random walk. Intuitively as the names suggest the difference between this two class 
 is in the time function that could be integer or real, for a more formal definition consider the random walk as a system composed by a family of random variables ${X_{t}}$
 the variables $X_{t}$ will measure the system at time t, now if we consider $t\in \mathbb{N}$  is a discrete-time stochastic process, otherwise if 
-$t \in \mathbb{R}^{+} \bigcup \{0\}$ is a continous-time stochastic process. 
+$t \in \mathbb{R}^{+} \bigcup \{0\}$ is a continuous-time stochastic process. 
 
 % final
 Here we focus on the discrete-time, in particular we bind this to graphs considering the random walk on a cyclic graph of order N.
 
 \subsection{Quantum Walks}
 
-The Quantum version of random walks is called Quantum Walks, also here there is a disctinction between the two model of discrete quantum walks and 
-continous quantum walks, the focus of this research remain in the discrete-time domain also for the quantum side. 
+The Quantum version of random walks is called Quantum Walks, also here there is a distinction between the two model of discrete quantum walks and 
+continuous quantum walks, the focus of this research remain in the discrete-time domain also for the quantum side. 
 
 Following the previous example of the random walk on a line here we discuss about a discrete quantum walk on a line called coined Discrete Quantum Walk on a Line (Coined DQWL), there are also versions without coin. It's worth introducing
-the Coined DQWL in a formal and generic way, then apply to a more concrete example. A formal description starts considering the three main components of a Coined QDWL: 
+the Coined DQWL in a formal and generic way, then apply to a more concrete example. A formal description starts considering the three main components of a Coined DQWL: 
 A walker operator, a coin, an evolution operator usually called shift operator. 
 
 % the walker
-The Walker represents the position of our system and is defined in a Hilbert space inifite but countable $\mathcal{H}_{p}$, a vector in that space represents 
-the postion of the walker, $\ket{position} \in \mathcal{H}_{p}$ 
+The Walker represents the position of our system and is defined in a Hilbert space infinite but countable $\mathcal{H}_{p}$, a vector in that space represents 
+the position of the walker, $\ket{position} \in \mathcal{H}_{p}$ 
 
 % the coin
 The coin operator is defined in a two-dimension Hilbert space, if we consider as basis state $\ket{0}$ and $\ket{1}$ then the coin space becomes
