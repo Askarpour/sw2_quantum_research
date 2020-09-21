@@ -10,44 +10,43 @@
 \usepackage{xcolor}
 \usepackage[toc, page]{appendix}
 \usepackage{hyperref}
+\usepackage{courier}
 \usetikzlibrary{quantikz}     
 
-\usepackage[style=numeric]{biblatex}
-\addbibresource{sections/references.bib}
-
-%%%%%%%% code color %%%%%%%%%%
-
+%New colors defined below
 \definecolor{codegreen}{rgb}{0,0.6,0}
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
 \definecolor{codepurple}{rgb}{0.58,0,0.82}
 \definecolor{backcolour}{rgb}{0.95,0.95,0.92}
 
+%Code listing style named "mystyle"
 \lstdefinestyle{mystyle}{
-    backgroundcolor=\color{backcolour},   
-    commentstyle=\color{codegreen},
-    keywordstyle=\color{magenta},
-    numberstyle=\tiny\color{codegray},
-    stringstyle=\color{codepurple},
-    basicstyle=\ttfamily\footnotesize,
-    breakatwhitespace=false,         
-    breaklines=true,                 
-    captionpos=b,                    
-    keepspaces=true,                 
-    numbers=left,                    
-    numbersep=5pt,                  
-    showspaces=false,                
-    showstringspaces=false,
-    showtabs=false,                  
-    tabsize=2
+  backgroundcolor=\color{backcolour},   commentstyle=\color{codegreen},
+  keywordstyle=\color{magenta},
+  numberstyle=\tiny\color{codegray},
+  stringstyle=\color{codepurple},
+  basicstyle=\ttfamily\footnotesize,
+  breakatwhitespace=false,         
+  breaklines=true,                 
+  captionpos=b,                    
+  keepspaces=true,                 
+  numbers=left,                    
+  numbersep=5pt,                  
+  showspaces=false,                
+  showstringspaces=false,
+  showtabs=false,                  
+  tabsize=2
 }
 
+%"mystyle" code listing set
 \lstset{style=mystyle}
+\lstset{basicstyle=\footnotesize\ttfamily,breaklines=true}
+\lstset{framextopmargin=50pt,frame=bottomline}
+
 
 \title{\textbf{Quantum Research Project}}
 \author{Pierriccardo Olivieri}
 \date{March 2020}
-
-
 
 \begin{document}
 \pagenumbering{arabic}
@@ -73,22 +72,16 @@
 \input{sections/6_szegedy_quantum_walk.tex}
 \input{sections/7_applications.tex}
 \input{sections/8_conclusions.tex}
-\printbibliography[title={References}]
 
+\bibliographystyle{abbrv}
+\bibliography{sections/references}
+
+
+\onecolumn
 
 \begin{appendices}
-\twocolumn[
-  \begin{@twocolumnfalse}
-    \clearpage
-    \input{sections/A_coined_quantum_walk.tex}    
-  \end{@twocolumnfalse}
-  ]
-\twocolumn[
-  \begin{@twocolumnfalse}
-    \clearpage
+    \input{sections/A_coined_quantum_walk.tex} 
     \input{sections/B_szegedy_quantum_walk.tex}
-  \end{@twocolumnfalse}
-  ] 
-      
-\end{appendices}
+\end{appendices}   
+
 \end{document}

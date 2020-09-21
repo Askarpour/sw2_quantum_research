@@ -50,7 +50,7 @@
     We can identify two type of Random Walk
     \begin{itemize}
         \item discrete time 
-        \item continous time 
+        \item continuous time 
     \end{itemize}
     
 \end{frame}
@@ -111,7 +111,7 @@
     \begin{equation}
         \ket{position} \in \mathcal{H}_{p}
     \end{equation} 
-    encoding in binary labels we need Log(N) qubits to reresent the number.
+    encoding in binary labels we need Log(N) qubits to represent the number.
 
     \begin{example}[$N < 8 => 3 qubits$]
         \begin{itemize}
@@ -264,7 +264,7 @@
 
 \begin{frame}
     \frametitle{Generalization}
-    Two Generalization anlysis
+    Two Generalization analysis
     \begin{columns}[T]
         \begin{column}{.5\textwidth}
             \begin{block}{w.r.t. model}
@@ -295,7 +295,7 @@
                 \item \small are difficult to implement
                 \item \small implementation may require ancillary qubits
                 \item \small various type (ancillary, rotations)
-                \item \small can lead to inefficiency of the circut
+                \item \small can lead to inefficiency of the circuit
             \end{itemize}
         \end{column}
         \begin{column}{.5\textwidth}
@@ -318,12 +318,12 @@
         find a marked vertex in a graph using Quantum Walks
         and measure where the probability of find it is high
     \end{definition}
-    Concepts to consider to comapre performance w.r.t. classic
+    Concepts to consider to compare performance w.r.t. classic
     \begin{itemize}
         \item \small Comparison made by consider total number of queries to a fixed oracle
         \item \small Efficiency of the circuit at most O(Poly(log(N))) two and one qubit gates
-        \item \small Considered efficient if a quadratic speedup is possble wrt classical best search
-        \item \small A speedup is possble w.r.t. some class of graphs (hypercube, toroid...)
+        \item \small Considered efficient if a quadratic speedup is possible wrt classical best search
+        \item \small A speedup is possible w.r.t. some class of graphs (hypercube, toroid...)
     \end{itemize}
 
 \end{frame}
@@ -333,15 +333,15 @@
     This method is limited to certain type of graphs:
     \begin{itemize}
         \item undirected graph
-        \item wighted graphs
+        \item weighted graphs
     \end{itemize}
     To overcome this limitations we need another model: Szegedy QW
 \end{frame}
 
 
 \begin{frame}
-    \frametitle{Markow Chain}
-    A Markow chain is
+    \frametitle{Markov Chain}
+    A Markov chain is
     \begin{itemize}
         \item Stochastic process
         \item sequence of random variables
@@ -430,7 +430,7 @@
         \mathcal{H} = \mathcal{H}_{2}^{N} \otimes \mathcal{H}_{2}^{2}
     \end{equation}
     Where N is the number of nodes, thus $\mathcal{H}$ has dimension $N^{2}$ 
-    Here the state vector is compoed of two vector $R_{1}$ and $R_{2}$
+    Here the state vector is composed of two vector $R_{1}$ and $R_{2}$
 
 \end{frame}
 
@@ -451,7 +451,7 @@
 
 \begin{frame}
     \frametitle{Reflection Operator}
-    Then we define the projector states of the markow chain:
+    Then we define the projector states of the Markov chain:
     
     \begin{equation}
         \ket{\psi_{i}} = \ket{i} \otimes \sum_{j=0}^{N-1}\sqrt{P_{j+1,i+1}}\ket{j} \equiv \ket{i} \otimes \ket{\phi_{i}}

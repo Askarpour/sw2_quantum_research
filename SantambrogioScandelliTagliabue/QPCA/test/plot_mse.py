@@ -3,7 +3,8 @@ import matplotlib.pyplot as plt
 from masksfound import filemetrics_fix
 
 result = []
-dims = [2,4,8]
+
+dims = [2,4,8,16]
 nbits = 7
 iters = 2
 randv = 8
@@ -18,7 +19,7 @@ print("result: ",result)
 
 plt.figure(0)
 plt.title("MSE with respect to the dimension of the matrix")
-
+print ([i[0][0] for i in result])
 plt.plot( dims, [i[0][0] for i in result])
         
 
