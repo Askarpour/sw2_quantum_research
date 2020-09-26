@@ -2,12 +2,15 @@ import numpy as np
 import pickle
 #Script containing useful functions to parse result data from tests
 
+#function to check if an instance in the result file is valid
 def check(inst):
     real_val=inst[0]
     #print(sorted(real_val), sum(sorted(real_val)[-2:]))
     return sum(sorted(real_val)[-2:])>0
         
-
+#function used to fetch a file that returns the mean mean square error over all
+# eigenvector approximations and the metric that tells how many top eigebvalues 
+# have been found (Deprecated, use filemetrics_fix instead)
 def filemetrics(dim, precision, n_iter, n_randvecs, n_topick, threshold_perc, destfile=None, limit=500):
     if destfile is None:
         destfile = "dim"+str(dim)+"_prec"+str(precision)+"_iter"+str(n_iter)+"_rand"+str(n_randvecs)+"_top"+str(n_topick)+"_tresh"+str(threshold_perc).replace(".","")[:3]
@@ -50,6 +53,8 @@ def filemetrics(dim, precision, n_iter, n_randvecs, n_topick, threshold_perc, de
         print(mask,lenmask)
     return (mmse/count_mse,mmasklen/limit)
 
+#Function used to compute the metric given a mask that is true when the corresponding
+# eigenvalue has been found/approximated
 def compute_mask_metric(mask):
     lenmask = 0
     for i in range(len(mask)-1,-1,-1):
@@ -65,6 +70,7 @@ def comp_mse(real,approx):
     MSE2 = np.mean(np.subtract(-real, approx)**2)
     return MSE1 if MSE1<MSE2 else MSE2
 
+#Reccomented function for filemetrics
 def filemetrics_fix(dim, precision, n_iter, n_randvecs, destfile=None):
     if destfile is None:
         destfile = "dim"+str(dim)+"_prec"+str(precision)+"_iter"+str(n_iter)+"_rand"+str(n_randvecs)

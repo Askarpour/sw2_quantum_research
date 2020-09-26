@@ -18,6 +18,7 @@ destfile = "test_data/" + destfile
 with open(destfile, 'rb') as f:
     while True:
         try:
+            print(">>Instance n°: ",counter)
             print(pickle.load(f))
             counter+=1
         except(EOFError):
