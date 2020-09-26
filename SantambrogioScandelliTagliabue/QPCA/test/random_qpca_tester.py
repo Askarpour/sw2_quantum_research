@@ -6,6 +6,8 @@ from test_utils import create_matrix
 from test_utils import create_rand_vec
 from test_utils import addtoevals
 import numpy as np
+#Script file used to generate "ncomplete" random matrices and compute qpca over them
+# use qpca_tester instead
 
 dim = int(sys.argv[1])
 precision = int(sys.argv[2])

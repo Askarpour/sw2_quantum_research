@@ -1,5 +1,6 @@
 import numpy as np
 import pickle
+#Script containing useful functions to parse result data from tests
 
 def check(inst):
     real_val=inst[0]
@@ -58,6 +59,7 @@ def compute_mask_metric(mask):
             break
     return lenmask
 
+#Compute mean square error of an approximation of an eigenvector from a real eigenvector
 def comp_mse(real,approx):
     MSE1 = np.mean(np.subtract(real, approx)**2)
     MSE2 = np.mean(np.subtract(-real, approx)**2)

@@ -1,6 +1,7 @@
 import numpy as np
 import scipy
 
+#Creates a random covariance matrix dim x dim
 def create_matrix(dim):
     data = scipy.random.rand(10,dim)*20
     means = np.mean(data,axis=0)
@@ -13,6 +14,8 @@ def create_matrix(dim):
     covmat=covmat/np.trace(covmat)
     return covmat
 
+#Creates a random covariance matrix dim x dim having k eigenvalues that are 
+#larger than others
 def create_cus_matrix(dim, k):
     w = np.random.randn(dim, k)
     s = w.dot(w.T)
@@ -20,9 +23,12 @@ def create_cus_matrix(dim, k):
     s = np.add(s,d)
     return s/np.trace(s)
 
+#Creates a random vector of length dim
 def create_rand_vec(dim):
     return  np.random.rand(dim)*2 - 1
 
+#Useful function to merge different eigenvalues found being the same eigenvalue
+#due to noisy measurements
 def addtoevals(vec, i, prec):
     toremove=[]
     toadd = i

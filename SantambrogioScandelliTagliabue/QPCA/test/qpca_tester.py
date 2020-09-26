@@ -6,19 +6,30 @@ from qpca import qpca
 from test_utils import create_rand_vec
 import numpy as np
 from qiskit import IBMQ, Aer
-from qiskit.visualization import plot_histogram
 import matplotlib.pyplot as plt
-IBMQ.save_account('a4cafd7af86fa3201e4308125da261daf2873395617f7337cbf274afb0f4be6492bc30c08fba1693395155dd60f27d961e70a4f0670b9cdf30d0be72b4dd9cad')
+#Script that runs tests over qpca module using real/simulated quantum computer, 
+#it can plot results or save them using pickle into destfile
 
-IBMQ.load_account()
-provider=IBMQ.get_provider(hub='ibm-q', group='open', project='main')
+# IBMQ.save_account('insert key here for real ibqm experience')
+# IBMQ.load_account()
+# provider=IBMQ.get_provider(hub='ibm-q', group='open', project='main')
 
-
+#The dimension of the covariance matrices used
 dim = int(sys.argv[1])
+
+#The precision required to run the algo (bits used for the encoding of the eigenvalues)
 precision = int(sys.argv[2])
+
+#Number of iteration done using the previous approximated results (of the eigenvector)
 n_iter = int(sys.argv[3])
+
+#Number of different random initializations
 n_randvecs = int(sys.argv[4])
+
+#Noise threshold under we discard eigenvalues
 threshold_perc = 0.13
+
+#Parameter used to specify the name of output file
 if len(sys.argv)<6:
     destfile = "dim"+str(dim)+"_prec"+str(precision)+"_iter"+str(n_iter)+"_rand"+str(n_randvecs)
 else:
@@ -39,8 +50,8 @@ with open(sourcefile, "rb") as f:
 #random.shuffle(covmats)
 
 covmats = [covmats[0]]
-#sim= Aer.get_backend('qasm_simulator')#
-sim = provider.get_backend('ibmq_vigo')
+sim= Aer.get_backend('qasm_simulator')#
+#sim = provider.get_backend('ibmq_vigo')
 
 
 with open(destfile, "ab") as f:
