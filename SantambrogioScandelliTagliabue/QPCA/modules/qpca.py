@@ -36,12 +36,11 @@ Used to specify an initial approximation of the eigenvector for the quantum phas
 """
 def generatefirst(psibits, realdim, ie):
     initial=[0]*2**psibits
-    if np.all(ie):
-        for i in range(len(ie)):
-            initial[i]=ie[i]
+    if len(ie)!=realdim:
+        raise Exception()
     else:
         for i in range(realdim):
-            initial[i] = 1
+            initial[i] = ie[i]
     return initial / np.linalg.norm(initial)
 
 """
@@ -98,11 +97,10 @@ PARAMETERS
 - covmat: the matrix to eigendecompose of dimensions NxN
 - precision: the number of bits used to estimate the eigenvalue
 - initialeig: vector of dimension N initial approximation of an eigenvector of the matrix
-- iterations: the number of iterations of the algorithm to be performed
 - simulator: a qiskit simulator, can be also a real quantum computer
-- req_shots: the number of runs of the quantum circuit to be performed
+- req_shots: the number of runs of the quantum circuit for each psibit to be performed
 """
-def qpca(covmat, precision, initial = None, backend=BasicAer.get_backend('qasm_simulator'), req_shots=8192):
+def qpca(covmat, precision, initial = None, backend=BasicAer.get_backend('qasm_simulator'), req_shots=8192, nbitsroundoff = 0):
     NBITS = precision
     REALDIM=len(covmat)
     covmat, PSIBITS = preprocess_mat(covmat)
@@ -110,14 +108,14 @@ def qpca(covmat, precision, initial = None, backend=BasicAer.get_backend('qasm_s
     #Generate the first circuit that measures on z basis
     counts = []
     circuit = generate_circuit(initial, covmat, NBITS, PSIBITS, "z"*(PSIBITS+NBITS))
-    job = execute(circuit, backend, shots=req_shots//PSIBITS)
+    job = execute(circuit, backend, shots=req_shots)
     res = job.result().get_counts()
     counts.append(res)
     #Generate circuits that measure relative phases
     for i in range(PSIBITS):
         mask = "z"*(NBITS+i)+"x"+"z"*(PSIBITS-i-1)
         circuit = generate_circuit(initial, covmat, NBITS, PSIBITS, mask)
-        job = execute(circuit, backend, shots=req_shots//PSIBITS)
+        job = execute(circuit, backend, shots=req_shots)
         res = job.result().get_counts()
         counts.append(res)
-    return QPCAResult(counts, circuit, PSIBITS, NBITS)
+    return QPCAResult(counts, circuit, PSIBITS, NBITS, nbitsroundoff)

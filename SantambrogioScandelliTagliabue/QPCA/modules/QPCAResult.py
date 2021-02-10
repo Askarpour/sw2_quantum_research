@@ -18,11 +18,11 @@ METHODS:
 - get_last: getter for the last circuit
 """
 class QPCAResult(object):
-    def __init__(self, counts, lastcirc, psibits, nbits):
+    def __init__(self, counts, lastcirc, psibits, nbits, nbitsroundoff):
         self.psibits = psibits
-        self.nbits =nbits
-        self._counts = counts
-        eigvals_dics=[retrieve_eigvals(i, psibits) for i in counts]
+        self.nbits = nbits-nbitsroundoff
+        self._counts = roundoff_counts(counts, nbits, psibits, nbitsroundoff)
+        eigvals_dics=[retrieve_eigvals(i, psibits) for i in self._counts]      
         self._lastcirc=lastcirc
         self.possible_keys = set().union(*eigvals_dics)
         self.eigvalcounts = {k: sum([i.get(k,0) for i in eigvals_dics]) for k in self.possible_keys}
@@ -30,8 +30,12 @@ class QPCAResult(object):
         return (sorted(self.eigvalcounts.items(), key=lambda x:x[1]) if sort else self.eigvalcounts)
     def eigvec_from_eigval(self, eigval):
         measu = [retrieve_dicts(i, self.psibits) for i in self._counts]
-        tosubmit = [i.get(eigval,0) for i in measu]
-        eigv = estimate_vector(tosubmit, self.psibits)
+        tosubmit = [i.get(eigval,{}) for i in measu]
+        try:
+            eigv = estimate_vector(tosubmit, self.psibits)
+        except ZeroDivisionError:
+            print(f"WARNING, missing data for the estimation of state associated to {eigval}, returning empty vector")
+            eigv = []
         return eigv
     def get_last(self):
         return self._lastcirc
@@ -51,6 +55,50 @@ class QPCAResult(object):
                     self._counts[i][j] += other._counts[i][j]
 
 
+"""
+Converts the dictionary of counts in the original psibits+nbits representation into
+ psibits+nbits-roundoff by rounding the eigenvalue estimation 
+"""
+def roundoff_counts(counts,nbits, psibits ,roundoff = 0):
+    newcounts = []
+    for basis_count in counts: #iterate over dictionary corresponding to each basis
+        newcounts.append({})
+        for item in basis_count.items():
+            binary = item[0] #binary number we are considering
+            occurrences = item[1] #number of occurrences of the binary number
+            
+            if roundoff > 0  and binary[len(binary)-roundoff]=='1':
+                key_to_add = binary[:psibits] + aux_increment(binary[psibits:], roundoff)
+            else:
+                key_to_add = binary[:len(binary)-roundoff]
+            if  key_to_add not in newcounts[-1].keys():
+                newcounts[-1][key_to_add] = occurrences
+            else: 
+                newcounts[-1][key_to_add]+=occurrences
+    return newcounts
+                
+"""
+Auxiliary function used to handle the rounding of the binary number
+"""
+def aux_increment(binary, roundoff):
+    to_inc = binary[:len(binary)-roundoff]
+    return to_inc if all([i=='1' for i in to_inc]) else add_binary_nums(to_inc, '1')
+
+        
+def add_binary_nums(x, y): 
+        max_len = max(len(x), len(y)) 
+        x = x.zfill(max_len) 
+        y = y.zfill(max_len)  
+        result = '' 
+        carry = 0
+        for i in range(max_len - 1, -1, -1): 
+            r = carry 
+            r += 1 if x[i] == '1' else 0
+            r += 1 if y[i] == '1' else 0
+            result = ('1' if r % 2 == 1 else '0') + result 
+            carry = 0 if r < 2 else 1 
+        if carry !=0 : result = '1' + result 
+        return result.zfill(max_len) 
 
 """
 Utility function that converts a binary number string in a decimal number
@@ -98,7 +146,9 @@ def estimate_vector(measurements, dim):
             if key not in i.keys():
                 i[key] = 0
     meas = measurements[0]
+    
     estvect = [np.sqrt(meas.get('{number:0{width}b}'.format(width=dim,number=i))/sum(meas.values())) for i in range(2**dim)]
+    
     #signs
     for i in range(dim):
         estvect = np.reshape(estvect,(-1,2**i))

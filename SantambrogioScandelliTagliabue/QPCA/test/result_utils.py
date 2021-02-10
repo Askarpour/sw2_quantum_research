@@ -9,7 +9,7 @@ def check(inst):
     return sum(sorted(real_val)[-2:])>0
         
 #function used to fetch a file that returns the mean mean square error over all
-# eigenvector approximations and the metric that tells how many top eigebvalues 
+# eigenvector approximations and the metric that tells how many top eigenvalues 
 # have been found (Deprecated, use filemetrics_fix instead)
 def filemetrics(dim, precision, n_iter, n_randvecs, n_topick, threshold_perc, destfile=None, limit=500):
     if destfile is None:
