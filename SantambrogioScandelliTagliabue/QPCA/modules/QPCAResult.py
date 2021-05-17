@@ -10,20 +10,17 @@ ATTRIBUTES:
 - nbits:  the number of bits used to estimate the eigenvalue
 - _count_tuple: a tuple that stores counts of measurements made on z basis and x basis
 - _eigvec: the eigenvector estimated by the experiment, if iterations was 1 it will probably be a linear combinations of all the matrix eigenvectors
-- _lastcirc: the last quantum circuit created by the qpca function
 - eigvalcounts: a dictionary that specifies how many times in a shot we have found as a result eigenvalue a certain decimal number
 METHODS:
 - get_eigvals: getter for eigvalcounts attribute, it can also return the dictionary sorted by the counts
 - eigvec_from_eigval: specifying an eigenvalue found in the dictionary, it estimates the associated eigenvector using the measurements
-- get_last: getter for the last circuit
 """
 class QPCAResult(object):
-    def __init__(self, counts, lastcirc, psibits, nbits, nbitsroundoff):
+    def __init__(self, counts, psibits, nbits, nbitsroundoff):
         self.psibits = psibits
         self.nbits = nbits-nbitsroundoff
         self._counts = roundoff_counts(counts, nbits, psibits, nbitsroundoff)
         eigvals_dics=[retrieve_eigvals(i, psibits) for i in self._counts]      
-        self._lastcirc=lastcirc
         self.possible_keys = set().union(*eigvals_dics)
         self.eigvalcounts = {k: sum([i.get(k,0) for i in eigvals_dics]) for k in self.possible_keys}
     def get_eigvals(self, sort=True):
@@ -37,8 +34,6 @@ class QPCAResult(object):
             print(f"WARNING, missing data for the estimation of state associated to {eigval}, returning empty vector")
             eigv = []
         return eigv
-    def get_last(self):
-        return self._lastcirc
     def merge(self, other):
         if self.psibits!= other.psibits or self.nbits!=other.nbits:
             raise ValueError("Invalid merge")

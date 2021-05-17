@@ -1,7 +1,6 @@
 """
 Main module for QPCA, contains the functions to preprocess the matrix, creating the circuit and handling iterations
 """
-
 from QPCAResult import *
 from qiskit import(
         QuantumCircuit,
@@ -10,112 +9,161 @@ from qiskit import(
         QuantumRegister,
         ClassicalRegister)
 from math import *
-import scipy
+from scipy.linalg import expm
 import numpy as np
 from qiskit.quantum_info.operators import Operator
-from qiskit.aqua.utils.controlled_circuit import get_controlled_circuit
-from tomography import fin_eigv
 
-"""
-Checks if the matrix is valid, adds rows and columns in order to make it of 2**i length, return n° of bits required to encode it,
-it also proceeds to exponentiate the matrix, in order to make it unitary
-"""
-def preprocess_mat(matrix):
-    if matrix is None or len(matrix)!=len(matrix[0]) or len(matrix)==0:
-        raise ValueError()
-    while len(matrix) & (len(matrix) - 1) != 0:
-        b = np.zeros((len(matrix)+1,len(matrix)+1))
-        b[:-1,:-1] = matrix
-        matrix=b
-    PSIBITS = ceil(log2(len(matrix)))
-    matrix = scipy.linalg.expm(2*np.pi*1j*np.array(matrix))
-    return matrix, PSIBITS
 
-"""
-Used to specify an initial approximation of the eigenvector for the quantum phase estimation
-"""
-def generatefirst(psibits, realdim, ie):
-    initial=[0]*2**psibits
-    if len(ie)!=realdim:
-        raise Exception()
-    else:
-        for i in range(realdim):
-            initial[i] = ie[i]
-    return initial / np.linalg.norm(initial)
+class QPCA(object):
+    """
+    Class that represents the QPCA operation.
+    Attributes
+    ----------
+    covmat: array_like
+        the input covariance matrix
+    NBITS: int
+        number of qubits used to perform Quantum Phase Estimation
+    PSIBITS: int
+        number of qubits used to encode the eigenstates for Quantum Phase Estimation.
+        This is determined by the size of the input covariance matrix (covmat)
+    circuit: qiskit.circuit.QuantumCircuit
+        QuantumCircuit object that is generated and executed by QPCA
+    """
+    def __init__(self, covmat, precision):
+        self.covmat = covmat
+        self.NBITS = precision
+        self.generate_unitary()
+        self.initial_circ = None
+        self.circuit = None
+    def generate_unitary(self):
+        matrix = self.covmat
+        if matrix is None or len(matrix)!=len(matrix[0]) or len(matrix)==0:
+            raise ValueError()
+        while len(matrix) & (len(matrix) - 1) != 0:
+            b = np.zeros((len(matrix)+1,len(matrix)+1))
+            b[:-1,:-1] = matrix
+            matrix=b
+        self.PSIBITS = ceil(log2(len(matrix)))
+        self.unitary = expm(2*np.pi*1j*np.array(matrix))
 
-"""
-Used to generate a controlled gate from a unitary matrix
-"""
-def generate_cu3(unitary):
-    op = np.eye(2*len(unitary),dtype="complex")
-    for i in range(len(op)//2, len(op)):
-        for j in range(len(op)//2, len(op)):
-            op[i,j] = unitary[i-len(op)//2,j-len(op)//2]
-    return Operator(op)
+    def generate_cu3(self):
+        op = np.eye(2*len(self.unitary),dtype="complex")
+        for i in range(len(op)//2, len(op)):
+            for j in range(len(op)//2, len(op)):
+                op[i,j] = self.unitary[i-len(op)//2,j-len(op)//2]
+        return Operator(op)
 
-"""
-Creates the actual circuit for quantum phase estimation:
-PARAMETERS
-- initial: vector of dimension N initial approximation of an eigenvector of the matrix
-- covmat: the matrix to eigendecompose of dimensions NxN
-- NBITS: the number of bits used to estimate the eigenvalue
-- PSIBITS: the number of bits needed to encode the eigenvector, log2(N)
-- basevec: a string that specifies for each qubit, on which base it is measured (z,x,y)
-"""
-def generate_circuit(initial, covmat, NBITS, PSIBITS, basevec):
-    circuit = QuantumCircuit(NBITS+PSIBITS, NBITS+PSIBITS)
-    for i in range(NBITS):
-        circuit.h(i)
-    circuit.initialize(initial, [i for i in range(NBITS,NBITS+PSIBITS)])
-    #Phase kickback:
-    cu3 = generate_cu3(covmat)
-    qubits = circuit.qubits
-    for i in range(NBITS):
-        for j in range(2**i):
-            q = [qubits[k] for k in range(NBITS, NBITS+PSIBITS)] + [qubits[NBITS-i-1]]
-            circuit.unitary(cu3,q,label="rotation")
-    circuit.barrier()
-    #inverse QFT:
-    for i in range(NBITS):
-        circuit.h(i)
-        for j in range(1,NBITS-i):
-            circuit.cu1(-pi/(2**(j)),i,j+i)
-        circuit.barrier()
-    #basis measurement
-    for i in range(len(basevec)):
-        if basevec[i]=="x":
-            circuit.h(i)
-        if basevec[i]=="y":
-            circuit.sdg(i)
-            circuit.h(i)
-    circuit.measure([i for i in range(NBITS+PSIBITS)],[i for i in range(NBITS+PSIBITS)])
-    return circuit
+    def from_initial_state(self, statevector):
+        """
+        Generates and stores the base circuit for Quantum Phase Estimation using the provided statevector as initial state.
+        Parameters
+        ----------
+        statevector: array_like
+            vector representing the initial state to use for Quantum Phase Estimation.
+            If the length of the vector is smaller than the dimension of the matrix, it is extended with trailing zeros.
+        Raises
+        ------
+        Exception
+            if a statevector is not provided or its length is larger than the dimension of the matrix
+        """
+        #Preprocess initial state vector
+        if statevector is None or len(statevector)>len(self.covmat):
+            raise Exception("The provided statevector is not valid.")
+        else:
+            statevector = np.concatenate((statevector, [0] * (2**self.PSIBITS - len(statevector))))
+        statevector = statevector / np.linalg.norm(statevector)
+        self.circuit = QuantumCircuit(self.NBITS+self.PSIBITS, self.NBITS+self.PSIBITS)
+        self.circuit.initialize(statevector, [i for i in range(self.NBITS,self.NBITS+self.PSIBITS)])
+        self.add_qpe()
+        self.initial_circ = None
 
-"""
-The wrapper function used to handle multiple iterations of the quantum phase estimation algorithm:
-PARAMETERS
-- covmat: the matrix to eigendecompose of dimensions NxN
-- precision: the number of bits used to estimate the eigenvalue
-- initialeig: vector of dimension N initial approximation of an eigenvector of the matrix
-- simulator: a qiskit simulator, can be also a real quantum computer
-- req_shots: the number of runs of the quantum circuit for each psibit to be performed
-"""
-def qpca(covmat, precision, initial = None, backend=BasicAer.get_backend('qasm_simulator'), req_shots=8192, nbitsroundoff = 0):
-    NBITS = precision
-    REALDIM=len(covmat)
-    covmat, PSIBITS = preprocess_mat(covmat)
-    initial = generatefirst(PSIBITS, REALDIM, initial)
-    #Generate the first circuit that measures on z basis
-    counts = []
-    circuit = generate_circuit(initial, covmat, NBITS, PSIBITS, "z"*(PSIBITS+NBITS))
-    job = execute(circuit, backend, shots=req_shots)
-    res = job.result().get_counts()
-    counts.append(res)
-    #Generate circuits that measure relative phases
-    for i in range(PSIBITS):
-        mask = "z"*(NBITS+i)+"x"+"z"*(PSIBITS-i-1)
-        circuit = generate_circuit(initial, covmat, NBITS, PSIBITS, mask)
+    def from_initial_circuit(self, initial_circ, qreg):
+        """
+        Generates and stores the base circuit for Quantum Phase Estimation starting from an initial circuit.
+        The QPE circuit is built on the provided initial circuit using the specified quantum register for the initial state.
+        Only the specified QuantumRegister (qreg) is used by the QPCA, while the rest of the circuit is ignored.
+        Note that the number of qubits in qreg must match the PSIBITS value.
+        Parameters
+        ----------
+        initial_circ: qiskit.circuit.QuantumCircuit
+            QuantumCircuit object that could contain previous operations before the QPCA operation is applied to it.
+        qreg: qiskit.circuit.QuantumRegister
+            QuantumRegister object, that is part of the provided QuantumCircuit (initial_circ), to be used for the initial state of Quantum Phase Estimation.
+        Raises
+        ------
+        Exception
+            if either initial_circ or qreg are not provided or are not the correct object types.
+        """
+        if not isinstance(initial_circ, QuantumCircuit) or not isinstance(qreg, QuantumRegister):
+            raise Exception("Initial QuantumRegister and QuantumCircuit must be provided.")
+        self.circuit = QuantumCircuit(QuantumRegister(self.NBITS),qreg, ClassicalRegister(self.NBITS+self.PSIBITS))
+        self.initial_circ = initial_circ
+        self.add_qpe()
+
+    def add_qpe(self):
+        for i in range(self.NBITS):
+            self.circuit.h(i)
+        #Phase kickback:
+        cu3 = self.generate_cu3()
+        qubits = self.circuit.qubits
+        for i in range(self.NBITS):
+            for j in range(2**i):
+                q = [qubits[k] for k in range(self.NBITS, self.NBITS+self.PSIBITS)] + [qubits[self.NBITS-i-1]]
+                self.circuit.unitary(cu3,q,label="rotation")
+        self.circuit.barrier()
+        #inverse QFT:
+        for i in range(self.NBITS):
+            self.circuit.h(i)
+            for j in range(1,self.NBITS-i):
+                self.circuit.cu1(-pi/(2**(j)),i,j+i)
+        self.circuit.barrier()
+
+    def add_measurements(self,mask):
+        circ = self.circuit.copy()
+        for i in range(len(mask)):
+            if mask[i]=="x":
+                circ.h(i)
+            if mask[i]=="y":
+                circ.sdg(i)
+                circ.h(i)
+        circ.measure([i for i in range(self.NBITS+self.PSIBITS)],[i for i in range(self.NBITS+self.PSIBITS)])
+        return circ
+
+    def execute(self, roundoff, req_shots=1024, backend=BasicAer.get_backend('qasm_simulator')):
+        """
+        Executes the stored circuit and measures in the different basis to produce estimates of the eigenstates.
+        Parameters
+        ----------
+        roundoff: int
+            number of bits to round off in the approximations of the eigenvalues, as estimated by the Quantum Phase Estimation circuit.
+        req_shots: int, optional
+            number of shots to execute for the circuit (default 1024).
+            This number is repeated for each measurement basis, in number corresponding to PSIBITS.
+        backend: Qiskit backend, optional
+            The backend used to execute the circuit (default is qasm_simulator). Can also be a real quantum processor provided by IBMQ.
+        Returns
+        -------
+        QPCAResult object representing the result of the QPCA operation
+        Raises
+        ------
+        Exception
+            if no circuit has been generated prior to the call to this function.
+        """
+        if self.circuit is None:
+            raise Exception("No circuit has been generated. Call 'from_initial_state' or 'from_initial_circuit' first to generate a circuit that can be executed.")
+        counts = []
+        circuit = self.add_measurements("z"*(self.PSIBITS+self.NBITS))
+        if self.initial_circ is not None:
+            circuit = self.initial_circ + circuit
         job = execute(circuit, backend, shots=req_shots)
         res = job.result().get_counts()
         counts.append(res)
-    return QPCAResult(counts, circuit, PSIBITS, NBITS, nbitsroundoff)
+        for i in range(self.PSIBITS):
+            mask = "z"*(self.NBITS+i)+"x"+"z"*(self.PSIBITS-i-1)
+            circuit = self.add_measurements(mask)
+            if self.initial_circ is not None:
+                circuit = self.initial_circ + circuit
+            job = execute(circuit, backend, shots=req_shots)
+            res = job.result().get_counts()
+            counts.append(res)
+        return QPCAResult(counts, self.PSIBITS, self.NBITS, roundoff)
